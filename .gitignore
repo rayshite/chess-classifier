@@ -1,6 +1,7 @@
-/data
+data/
+**/data/
 
 *.keras
 
 .ipynb_checkpoints/
-*/.ipynb_checkpoints/*
+**/.ipynb_checkpoints/

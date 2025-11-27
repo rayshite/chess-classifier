@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шахматные партии</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<!-- Header -->
+<nav class="navbar navbar-dark bg-dark mb-4 pt-2 pb-4">
+    <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <img src="/static/images/logo.svg" alt="Logo" width="25" height="55">
+                <span class="brand-title">Шахматные партии</span>
+            </span>
+        <div class="d-flex gap-3 align-items-center">
+            <span class="badge bg-secondary" id="userName">Иван Петров</span>
+            <a href="#" id="logoutBtn" class="text-black" title="Выйти">
+                <i class="bi bi-box-arrow-right" style="font-size: 20px;"></i>
+            </a>
+        </div>
+    </div>
+</nav>
+
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <button id="createGameBtn" class="btn btn-primary">Создать партию</button>
+
+        <div class="d-flex align-items-center gap-2">
+            <label class="mb-0">Статус:</label>
+            <select id="statusFilter" class="form-select form-select-sm" style="width: auto;">
+                <option value="all">Все</option>
+                <option value="in_progress">В процессе</option>
+                <option value="finished">Завершенные</option>
+            </select>
+        </div>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Название</th>
+            <th>Игрок 1 (Белые)</th>
+            <th>Игрок 2 (Черные)</th>
+            <th>Снепшотов</th>
+            <th>Статус</th>
+            <th>Дата</th>
+        </tr>
+        </thead>
+        <tbody id="gamesList"></tbody>
+    </table>
+
+    <nav aria-label="Навигация по страницам">
+        <ul class="pagination justify-content-center" id="pagination"></ul>
+    </nav>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/main.js"></script>
+</body>
+</html>

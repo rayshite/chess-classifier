@@ -1,0 +1,117 @@
+/* Шахматная цветовая палитра */
+:root {
+    --chess-light: #f0d9b5;
+    --chess-dark: #b58863;
+    --chess-white:  #fffff8;
+    --chess-black: #000000;
+}
+
+body {
+    background-color: var(--chess-white);
+}
+
+/* Шрифт для заголовка в хедере */
+.brand-title {
+    font-family: 'Great Vibes', cursive;
+    font-size: 2rem;
+    color: var(--chess-black);
+}
+
+/* Выравнивание логотипа и текста по центру */
+.navbar-brand {
+    display: inline-flex !important;
+    align-items: flex-end !important;
+}
+
+.navbar-brand img {
+    margin-right: 1rem;
+}
+
+/* Header & Footer */
+.navbar, footer {
+    padding: 0 10%;
+    background-color: var(--chess-white) !important;
+}
+
+/* Кнопки */
+.btn-primary {
+    background-color: var(--chess-dark) !important;
+    border-color: var(--chess-dark) !important;
+    color: var(--chess-white) !important;
+}
+
+.btn-primary:hover {
+    background-color: #9a6f4f !important;
+    border-color: #9a6f4f !important;
+}
+
+/* Бейджи */
+.badge.bg-secondary {
+    background-color: var(--chess-dark) !important;
+}
+
+.badge.bg-info {
+    background-color: var(--chess-light) !important;
+    color: var(--chess-black) !important;
+}
+
+.badge.bg-success {
+    background-color: var(--chess-dark) !important;
+}
+
+.badge.bg-primary {
+    background-color: #9a6f4f !important;
+}
+
+/* Таблица */
+.table {
+    --bs-table-bg: transparent;
+    background-color: var(--chess-white) !important;
+}
+
+.table tbody tr, .table thead th {
+    background-color: var(--chess-white) !important;
+}
+
+.table thead {
+    background-color: var(--chess-dark) !important;
+    color: var(--chess-white) !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--chess-light) !important;
+}
+
+/* Пагинация */
+.pagination .page-link {
+    color: var(--chess-black);
+    background-color: var(--chess-white);
+    border-color: var(--chess-dark);
+}
+
+.pagination .page-link:hover {
+    background-color: var(--chess-light);
+    border-color: var(--chess-dark);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--chess-dark);
+    border-color: var(--chess-dark);
+    color: var(--chess-white);
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: var(--chess-white);
+    border-color: var(--chess-dark);
+    color: #999;
+}
+
+/* Форма */
+.form-select, .form-control {
+    border-color: var(--chess-dark);
+}
+
+.form-select:focus, .form-control:focus {
+    border-color: var(--chess-dark);
+    box-shadow: 0 0 0 0.2rem rgba(181, 136, 99, 0.25);
+}

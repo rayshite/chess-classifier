@@ -1,12 +1,23 @@
+from pathlib import Path
+
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from board_service import process_board_image
 from classifier import predict_all_squares
 
 app = FastAPI()
 
+FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
-@app.post("/predict")
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+
+@app.get("/")
+async def home():
+    return FileResponse(FRONTEND_DIR / "index.html")
+
+@app.post("/api/predict")
 async def predict(image: UploadFile = File(...)):
     """
     Принимает изображение шахматной доски и возвращает предсказания.

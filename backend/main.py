@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 from board_service import process_board_image
 from classifier import predict_all_squares
@@ -10,16 +10,25 @@ from classifier import predict_all_squares
 app = FastAPI()
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
+TEMPLATES_DIR = FRONTEND_DIR / "templates"
 
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
+
 @app.get("/")
-async def home():
-    return FileResponse(FRONTEND_DIR / "index.html")
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "user_name": "Иван Петров"
+    })
 
 @app.get("/games/{game_id}")
-async def game_page(game_id: int):
-    return FileResponse(FRONTEND_DIR / "game.html")
+async def game_page(request: Request, game_id: int):
+    return templates.TemplateResponse("game.html", {
+        "request": request,
+        "user_name": "Иван Петров"
+    })
 
 @app.post("/api/predict")
 async def predict(image: UploadFile = File(...)):

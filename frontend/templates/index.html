@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Список партий - Шахматные партии{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <button id="createGameBtn" class="btn btn-primary">Создать партию</button>
+
+        <div class="d-flex align-items-center gap-2">
+            <label class="mb-0">Статус:</label>
+            <select id="statusFilter" class="form-select form-select-sm" style="width: auto;">
+                <option value="all">Все</option>
+                <option value="in_progress">В процессе</option>
+                <option value="finished">Завершенные</option>
+            </select>
+        </div>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Название</th>
+            <th>Игрок 1 (Белые)</th>
+            <th>Игрок 2 (Черные)</th>
+            <th>Снепшотов</th>
+            <th>Статус</th>
+            <th>Дата</th>
+        </tr>
+        </thead>
+        <tbody id="gamesList"></tbody>
+    </table>
+
+    <nav aria-label="Навигация по страницам">
+        <ul class="pagination justify-content-center" id="pagination"></ul>
+    </nav>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/main.js"></script>
+{% endblock %}

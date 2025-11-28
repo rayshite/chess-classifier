@@ -1,53 +1,88 @@
-// Настройки пагинации
-const ITEMS_PER_PAGE = 10;
+// Текущая страница и фильтр
 let currentPage = 1;
-let filteredGames = [];
+let currentStatus = 'all';
+
+// Загрузка партий с сервера
+async function loadGames(page = 1, status = 'all') {
+    try {
+        // Показываем индикатор загрузки
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('gamesTable').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('paginationNav').style.display = 'none';
+
+        // Запрос к API с фильтром
+        let url = `/api/games?page=${page}&limit=2`;
+        if (status && status !== 'all') {
+            url += `&status=${status}`;
+        }
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Ошибка загрузки данных');
+        }
+
+        const data = await response.json();
+        currentPage = data.pagination.currentPage;
+
+        // Скрываем индикатор загрузки
+        document.getElementById('loading').style.display = 'none';
+
+        // Отображаем данные
+        if (data.games.length === 0) {
+            document.getElementById('emptyState').style.display = 'block';
+        } else {
+            renderGames(data.games);
+            renderPagination(data.pagination);
+            document.getElementById('gamesTable').style.display = 'table';
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        document.getElementById('loading').style.display = 'none';
+        alert('Не удалось загрузить партии. Проверьте подключение к серверу.');
+    }
+}
 
 // Форматирование даты
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+function formatDate(isoString) {
+    const date = new Date(isoString);
+    return date.toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
 }
 
-// Создание HTML строки таблицы для партии
-function createGameRow(game) {
-    const statusText = game.status === 'in_progress' ? 'В процессе' : 'Завершена';
-    const badgeClass = game.status === 'in_progress' ? 'bg-success' : 'bg-primary';
+// Рендеринг списка партий
+function renderGames(games) {
+    const tbody = document.getElementById('gamesList');
+    tbody.innerHTML = games.map(game => {
+        const statusText = game.status === 'in_progress' ? 'В процессе' : 'Завершена';
+        const badgeClass = game.status === 'in_progress' ? 'bg-success' : 'bg-primary';
 
-    return `
-        <tr style="cursor: pointer;" onclick="openGame(${game.id})">
-            <td>${game.title}</td>
-            <td>${game.player1.name}</td>
-            <td>${game.player2.name}</td>
-            <td>${game.snapshotCount}</td>
-            <td><span class="badge ${badgeClass}">${statusText}</span></td>
-            <td>${formatDate(game.createdAt)}</td>
-        </tr>
-    `;
-}
-
-// Отображение текущей страницы
-function renderPage() {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    const end = start + ITEMS_PER_PAGE;
-    const pageGames = filteredGames.slice(start, end);
-
-    const gamesList = document.getElementById('gamesList');
-    gamesList.innerHTML = pageGames.map(game => createGameRow(game)).join('');
-
-    renderPagination();
+        return `
+            <tr style="cursor: pointer;" onclick="window.location.href='/games/${game.id}'">
+                <td>${game.title}</td>
+                <td>${game.player1.name}</td>
+                <td>${game.player2.name}</td>
+                <td>${game.snapshotCount}</td>
+                <td><span class="badge ${badgeClass}">${statusText}</span></td>
+                <td>${formatDate(game.createdAt)}</td>
+            </tr>
+        `;
+    }).join('');
 }
 
 // Рендеринг пагинации
-function renderPagination() {
-    const totalPages = Math.ceil(filteredGames.length / ITEMS_PER_PAGE);
-    const pagination = document.getElementById('pagination');
+function renderPagination(pagination) {
+    const { currentPage, totalPages } = pagination;
 
     if (totalPages <= 1) {
-        pagination.innerHTML = '';
+        document.getElementById('paginationNav').style.display = 'none';
         return;
     }
 
+    const paginationEl = document.getElementById('pagination');
     let html = '';
 
     // Кнопка "Назад"
@@ -73,21 +108,21 @@ function renderPagination() {
         </li>
     `;
 
-    pagination.innerHTML = html;
+    paginationEl.innerHTML = html;
+    document.getElementById('paginationNav').style.display = 'block';
 }
 
 // Переключение страницы
 function changePage(page) {
-    const totalPages = Math.ceil(filteredGames.length / ITEMS_PER_PAGE);
-    if (page < 1 || page > totalPages) return;
-
-    currentPage = page;
-    renderPage();
+    if (page < 1) return;
+    loadGames(page, currentStatus);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Открытие страницы партии
-function openGame(gameId) {
-    window.location.href = `/games/${gameId}`;
+// Фильтрация по статусу
+function filterGames() {
+    currentStatus = document.getElementById('statusFilter').value;
+    loadGames(1, currentStatus);  // Сбрасываем на первую страницу
 }
 
 // Создание новой партии
@@ -102,8 +137,8 @@ function logout() {
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
-    // Обработчик фильтра (пока не реализован)
-    // document.getElementById('statusFilter').addEventListener('change', filterGames);
+    // Загружаем партии
+    loadGames(1);
 
     // Обработчик кнопки создания партии
     document.getElementById('createGameBtn').addEventListener('click', createGame);
@@ -113,4 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         logout();
     });
+
+    // Обработчик фильтра
+    document.getElementById('statusFilter').addEventListener('change', filterGames);
 });

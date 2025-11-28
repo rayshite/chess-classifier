@@ -40,7 +40,7 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     role: Mapped[UserRole] = mapped_column(
-        Enum(UserRole, values_callable=lambda x: [e.value for e in x]),
+        Enum(UserRole, values_callable=lambda x: [e.value for e in x], name='user_role'),
         default=UserRole.STUDENT,
         nullable=False
     )
@@ -74,7 +74,7 @@ class Game(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     status: Mapped[GameStatus] = mapped_column(
-        Enum(GameStatus, values_callable=lambda x: [e.value for e in x]),
+        Enum(GameStatus, values_callable=lambda x: [e.value for e in x], name='game_status'),
         default=GameStatus.IN_PROGRESS,
         nullable=False
     )

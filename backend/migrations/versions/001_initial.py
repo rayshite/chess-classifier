@@ -59,7 +59,6 @@ def upgrade() -> None:
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('game_id', sa.Integer(), nullable=False),
         sa.Column('position', sa.Text(), nullable=False),
-        sa.Column('move_number', sa.Integer(), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.ForeignKeyConstraint(['game_id'], ['games.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id')
@@ -82,5 +81,5 @@ def downgrade() -> None:
     op.drop_table('games')
     op.drop_table('users')
 
-    sa.Enum(name='gamestatus').drop(op.get_bind(), checkfirst=True)
-    sa.Enum(name='userrole').drop(op.get_bind(), checkfirst=True)
+    sa.Enum(name='game_status').drop(op.get_bind(), checkfirst=True)
+    sa.Enum(name='user_role').drop(op.get_bind(), checkfirst=True)

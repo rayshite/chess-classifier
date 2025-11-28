@@ -28,7 +28,28 @@
             <th>Дата</th>
         </tr>
         </thead>
-        <tbody id="gamesList"></tbody>
+        <tbody id="gamesList">
+            {% for game in games %}
+            <tr style="cursor: pointer;" onclick="window.location.href='/games/{{ game.id }}'">
+                <td>{{ game.title }}</td>
+                <td>{{ game.player1.name }}</td>
+                <td>{{ game.player2.name }}</td>
+                <td>{{ game.snapshots|length }}</td>
+                <td>
+                    {% if game.status.value == 'in_progress' %}
+                    <span class="badge bg-success">В процессе</span>
+                    {% else %}
+                    <span class="badge bg-primary">Завершена</span>
+                    {% endif %}
+                </td>
+                <td>{{ game.created_at.strftime('%d.%m.%Y') }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center text-muted">Партий пока нет</td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 
     <nav aria-label="Навигация по страницам">

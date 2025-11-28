@@ -1,11 +1,14 @@
 from pathlib import Path
 
-from fastapi import FastAPI, UploadFile, File, HTTPException, Request
+from fastapi import Depends, FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from board_service import process_board_image
 from classifier import predict_all_squares
+from database import get_async_session
+from services import get_games_list
 
 app = FastAPI()
 
@@ -17,10 +20,17 @@ app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 @app.get("/")
-async def home(request: Request):
+async def home(
+    request: Request,
+    session: AsyncSession = Depends(get_async_session)
+):
+    # Получаем все партии из БД
+    games = await get_games_list(session)
+
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "user_name": "Иван Петров"
+        "user_name": "Иван Петров",  # TODO: получать из сессии
+        "games": games
     })
 
 @app.get("/games/{game_id}")

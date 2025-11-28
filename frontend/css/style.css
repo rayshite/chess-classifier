@@ -115,3 +115,33 @@ body {
     border-color: var(--chess-dark);
     box-shadow: 0 0 0 0.2rem rgba(181, 136, 99, 0.25);
 }
+
+/* Карточки */
+.card {
+    background-color: var(--chess-white);
+    border-color: var(--chess-dark);
+}
+
+.card-header {
+    background-color: var(--chess-light);
+    border-bottom-color: var(--chess-dark);
+}
+
+/* Карточки снепшотов */
+.snapshot-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.snapshot-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.snapshot-card > div[id^="board-"] {
+    border-bottom: 2px solid var(--chess-dark);
+}
+
+/* Доски в карточках */
+.snapshot-card .chessboard {
+    width: 100% !important;
+}

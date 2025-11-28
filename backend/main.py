@@ -17,6 +17,10 @@ app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 async def home():
     return FileResponse(FRONTEND_DIR / "index.html")
 
+@app.get("/games/{game_id}")
+async def game_page(game_id: int):
+    return FileResponse(FRONTEND_DIR / "game.html")
+
 @app.post("/api/predict")
 async def predict(image: UploadFile = File(...)):
     """

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Партия - Шахматные партии</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<!-- Header -->
+<nav class="navbar navbar-dark bg-dark mb-4 pt-2 pb-4">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">
+            <img src="/static/images/logo.svg" alt="Logo" width="24" height="48">
+            <span class="brand-title">Шахматные партии</span>
+        </span>
+        <div class="d-flex gap-3 align-items-center">
+            <span class="badge bg-secondary" id="userName">Иван Петров</span>
+            <a href="#" id="logoutBtn" class="text-black" title="Выйти">
+                <i class="bi bi-box-arrow-right" style="font-size: 20px;"></i>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Main -->
+<div class="container">
+    <!-- Навигация назад -->
+    <div class="mb-3">
+        <a href="/" class="text-decoration-none">
+            <i class="bi bi-arrow-left"></i> Назад к списку партий
+        </a>
+    </div>
+
+    <!-- Информация о партии -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0" id="gameTitle">Загрузка...</h4>
+            <span class="badge" id="gameStatus"></span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Игрок 1 (Белые):</strong> <span id="player1Name"></span></p>
+                    <p><strong>Игрок 2 (Черные):</strong> <span id="player2Name"></span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Дата создания:</strong> <span id="createdAt"></span></p>
+                    <p><strong>Снепшотов:</strong> <span id="snapshotCount"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Панель управления -->
+    <div class="d-flex gap-2 mb-4" id="controlPanel">
+        <button id="addSnapshotBtn" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Добавить снепшот
+        </button>
+        <button id="deleteLastSnapshotBtn" class="btn btn-primary">
+            <i class="bi bi-trash"></i> Удалить последний снепшот
+        </button>
+        <button id="finishGameBtn" class="btn btn-primary">
+            <i class="bi bi-check-circle"></i> Завершить партию
+        </button>
+    </div>
+
+    <!-- Снепшоты -->
+    <h5 class="mb-3">Снепшоты партии</h5>
+    <div class="row g-3" id="snapshotsList">
+        <!-- Снепшоты будут добавлены через JS -->
+    </div>
+
+    <!-- Пустое состояние -->
+    <div id="emptyState" class="text-center py-5" style="display: none;">
+        <i class="bi bi-inbox" style="font-size: 3rem; color: #999;"></i>
+        <p class="text-muted mt-3">Снепшотов пока нет. Добавьте первый снепшот, чтобы начать отслеживать партию.</p>
+    </div>
+</div>
+
+<!-- Модальное окно для просмотра снепшота -->
+<div class="modal fade" id="snapshotModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Снепшот #<span id="modalSnapshotNumber"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-center">
+                    <div id="modalBoard" style="width: 400px"></div>
+                </div>
+                <div class="mt-3 text-center">
+                    <strong>Ход:</strong> <span id="modalMoveNumber"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/game.js"></script>
+</body>
+</html>

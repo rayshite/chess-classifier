@@ -132,9 +132,72 @@ function filterUsers() {
     loadUsers(1, currentRole);
 }
 
+// Модальное окно добавления пользователя
+let addUserModal;
+
 // Открытие формы добавления пользователя
 function openAddUserModal() {
-    alert('Функция регистрации пользователя будет реализована позже');
+    // Очищаем форму
+    document.getElementById('addUserForm').reset();
+    document.getElementById('addUserError').style.display = 'none';
+
+    // Открываем модальное окно
+    addUserModal.show();
+}
+
+// Отправка формы регистрации
+async function submitUser() {
+    const name = document.getElementById('newUserName').value.trim();
+    const email = document.getElementById('newUserEmail').value.trim();
+    const password = document.getElementById('newUserPassword').value;
+    const role = document.getElementById('newUserRole').value;
+
+    const errorEl = document.getElementById('addUserError');
+    errorEl.style.display = 'none';
+
+    // Валидация на клиенте
+    if (!name || !email || !password) {
+        errorEl.textContent = 'Заполните все обязательные поля';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    if (password.length < 6) {
+        errorEl.textContent = 'Пароль должен быть не менее 6 символов';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    // Блокируем кнопку на время запроса
+    const submitBtn = document.getElementById('submitUserBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Регистрация...';
+
+    try {
+        const response = await fetch('/api/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, email, password, role })
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.detail || 'Ошибка при создании пользователя');
+        }
+
+        // Закрываем модальное окно и обновляем список
+        addUserModal.hide();
+        loadUsers(1, currentRole);
+
+    } catch (error) {
+        errorEl.textContent = error.message;
+        errorEl.style.display = 'block';
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Зарегистрировать';
+    }
 }
 
 // Выход из системы
@@ -144,11 +207,17 @@ function logout() {
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
+    // Инициализируем модальное окно
+    addUserModal = new bootstrap.Modal(document.getElementById('addUserModal'));
+
     // Загружаем пользователей
     loadUsers(1);
 
     // Обработчик кнопки добавления пользователя
     document.getElementById('addUserBtn').addEventListener('click', openAddUserModal);
+
+    // Обработчик кнопки отправки формы
+    document.getElementById('submitUserBtn').addEventListener('click', submitUser);
 
     // Обработчик кнопки выхода
     document.getElementById('logoutBtn').addEventListener('click', (e) => {

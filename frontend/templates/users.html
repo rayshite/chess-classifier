@@ -67,6 +67,48 @@
         </ul>
     </nav>
 </div>
+
+<!-- Модальное окно регистрации пользователя -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel">Регистрация пользователя</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="mb-3">
+                        <label for="newUserName" class="form-label">Имя</label>
+                        <input type="text" class="form-control" id="newUserName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newUserEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="newUserEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newUserPassword" class="form-label">Пароль</label>
+                        <input type="password" class="form-control" id="newUserPassword" required minlength="6">
+                        <div class="form-text">Минимум 6 символов</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newUserRole" class="form-label">Роль</label>
+                        <select class="form-select" id="newUserRole">
+                            <option value="student">Ученик</option>
+                            <option value="teacher">Учитель</option>
+                            <option value="admin">Администратор</option>
+                        </select>
+                    </div>
+                </form>
+                <div id="addUserError" class="alert alert-danger" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="submitUserBtn">Зарегистрировать</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from classifier import predict_all_squares
 from database import get_async_session
-from services import get_games_list, get_games_count, get_game_by_id, create_snapshot, delete_last_snapshot, update_game_status, process_board_image, predictions_to_fen, get_users_list, get_users_count
+from services import get_games_list, get_games_count, get_game_by_id, create_snapshot, delete_last_snapshot, update_game_status, process_board_image, predictions_to_fen, get_users_list, get_users_count, get_user_by_email, create_user
 
 app = FastAPI()
 
@@ -265,4 +265,53 @@ async def get_users(
             "totalCount": total_count,
             "limit": limit
         }
+    }
+
+
+@app.post("/api/users")
+async def create_new_user(
+    request: Request,
+    session: AsyncSession = Depends(get_async_session)
+):
+    """API endpoint для создания нового пользователя"""
+    from models import UserRole
+
+    data = await request.json()
+
+    name = data.get("name", "").strip()
+    email = data.get("email", "").strip()
+    password = data.get("password", "")
+    role = data.get("role", "student")
+
+    # Валидация
+    if not name:
+        raise HTTPException(status_code=400, detail="Имя обязательно")
+    if not email:
+        raise HTTPException(status_code=400, detail="Email обязателен")
+    if not password:
+        raise HTTPException(status_code=400, detail="Пароль обязателен")
+    if len(password) < 6:
+        raise HTTPException(status_code=400, detail="Пароль должен быть не менее 6 символов")
+
+    # Проверяем, что email не занят
+    existing_user = await get_user_by_email(session, email)
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует")
+
+    # Преобразуем роль
+    try:
+        user_role = UserRole(role)
+    except ValueError:
+        user_role = UserRole.STUDENT
+
+    # Создаем пользователя
+    user = await create_user(session, name, email, password, user_role)
+
+    return {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role.value,
+        "isActive": user.is_active,
+        "createdAt": user.created_at.isoformat()
     }

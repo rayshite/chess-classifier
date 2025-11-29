@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from board_service import process_board_image
 from classifier import predict_all_squares
 from database import get_async_session
-from services import get_games_list, get_games_count
+from services import get_games_list, get_games_count, get_game_by_id
 
 app = FastAPI()
 
@@ -85,6 +85,27 @@ async def game_page(request: Request, game_id: int):
         "request": request,
         "user_name": "Иван Петров"
     })
+
+@app.get("/api/games/{game_id}")
+async def get_game(
+    game_id: int,
+    session: AsyncSession = Depends(get_async_session)
+):
+    """API endpoint для получения информации о партии по ID"""
+    game = await get_game_by_id(session, game_id)
+
+    if not game:
+        raise HTTPException(status_code=404, detail="Партия не найдена")
+
+    return {
+        "id": game.id,
+        "title": game.title,
+        "status": game.status.value,
+        "player1": {"id": game.player1.id, "name": game.player1.name},
+        "player2": {"id": game.player2.id, "name": game.player2.name},
+        "snapshotCount": len(game.snapshots),
+        "createdAt": game.created_at.isoformat()
+    }
 
 @app.post("/api/predict")
 async def predict(image: UploadFile = File(...)):

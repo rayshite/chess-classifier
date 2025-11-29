@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from classifier import predict_all_squares
 from database import get_async_session
 from fastapi.responses import JSONResponse
-from services import get_games_list, get_games_count, get_game_by_id, create_snapshot, delete_last_snapshot, update_game_status, process_board_image, predictions_to_fen, get_users_list, get_users_count, get_user_by_email, create_user, authenticate_user
+from services import get_games_list, get_games_count, get_game_by_id, create_snapshot, delete_last_snapshot, update_game_status, process_board_image, predictions_to_fen, get_users_list, get_users_count, get_user_by_email, get_user_by_id, create_user, authenticate_user
 
 app = FastAPI()
 
@@ -28,10 +28,7 @@ async def login_page(request: Request):
 @app.get("/")
 async def home(request: Request):
     """Главная страница - отдает пустой шаблон, данные загружаются через API"""
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "user_name": "Иван Петров"  # TODO: получать из сессии
-    })
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/api/games")
 async def get_games(
@@ -87,18 +84,12 @@ async def get_games(
 
 @app.get("/games/{game_id}")
 async def game_page(request: Request, game_id: int):
-    return templates.TemplateResponse("game.html", {
-        "request": request,
-        "user_name": "Иван Петров"
-    })
+    return templates.TemplateResponse("game.html", {"request": request})
 
 @app.get("/users")
 async def users_page(request: Request):
     """Страница управления пользователями"""
-    return templates.TemplateResponse("users.html", {
-        "request": request,
-        "user_name": "Иван Петров"
-    })
+    return templates.TemplateResponse("users.html", {"request": request})
 
 @app.get("/api/games/{game_id}")
 async def get_game(
@@ -368,3 +359,32 @@ async def logout():
     response = JSONResponse(content={"message": "Выход выполнен"})
     response.delete_cookie("user_id")
     return response
+
+
+@app.get("/api/current_user")
+async def get_current_user(
+    request: Request,
+    session: AsyncSession = Depends(get_async_session)
+):
+    """API endpoint для получения текущего пользователя"""
+    user_id = request.cookies.get("user_id")
+
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Не авторизован")
+
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Не авторизован")
+
+    user = await get_user_by_id(session, user_id)
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Пользователь не найден")
+
+    return {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role.value
+    }

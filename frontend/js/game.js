@@ -129,14 +129,18 @@ function openSnapshotModal(snapshotId) {
 
 // Управление партией
 function updateControlPanel(game, snapshots) {
+    const addBtn = document.getElementById('addSnapshotBtn');
     const deleteBtn = document.getElementById('deleteLastSnapshotBtn');
     const statusBtn = document.getElementById('finishGameBtn');
 
-    // Отключаем кнопку удаления, если нет снепшотов
-    deleteBtn.disabled = snapshots.length === 0;
+    const isInProgress = game.status === 'in_progress';
+
+    // Кнопки добавления и удаления доступны только в статусе "в процессе"
+    addBtn.disabled = !isInProgress;
+    deleteBtn.disabled = !isInProgress || snapshots.length === 0;
 
     // Обновляем кнопку статуса в зависимости от текущего состояния
-    if (game.status === 'in_progress') {
+    if (isInProgress) {
         statusBtn.innerHTML = '<i class="bi bi-check-circle"></i> Завершить партию';
     } else {
         statusBtn.innerHTML = '<i class="bi bi-play-circle"></i> Возобновить партию';

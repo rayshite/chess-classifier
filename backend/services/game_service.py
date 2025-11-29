@@ -6,7 +6,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from models import Game, GameStatus
+from models import Game, GameStatus, Snapshot
 
 
 async def get_games_list(
@@ -95,3 +95,23 @@ async def get_games_count(session: AsyncSession, status: GameStatus | None = Non
     count = result.scalar()
 
     return count
+
+
+async def create_snapshot(session: AsyncSession, game_id: int, position: str):
+    """
+    Создать новый снепшот для партии.
+
+    Args:
+        session: Сессия БД
+        game_id: ID партии
+        position: Позиция в формате FEN
+
+    Returns:
+        Созданный снепшот
+    """
+    snapshot = Snapshot(game_id=game_id, position=position)
+    session.add(snapshot)
+    await session.commit()
+    await session.refresh(snapshot)
+
+    return snapshot

@@ -139,9 +139,97 @@ function updateControlPanel(game, snapshots) {
     finishBtn.disabled = game.status === 'finished';
 }
 
-// Добавление снепшота
-function addSnapshot() {
-    alert('Функция добавления снепшота будет реализована позже');
+// Модальное окно добавления снепшота
+let addSnapshotModal = null;
+
+// Открытие модального окна добавления снепшота
+function openAddSnapshotModal() {
+    if (!addSnapshotModal) {
+        addSnapshotModal = new bootstrap.Modal(document.getElementById('addSnapshotModal'));
+    }
+
+    // Сбрасываем форму
+    document.getElementById('addSnapshotForm').reset();
+    document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('uploadError').style.display = 'none';
+    document.getElementById('uploadProgress').style.display = 'none';
+    document.getElementById('submitSnapshotBtn').disabled = false;
+
+    addSnapshotModal.show();
+}
+
+// Превью изображения
+function handleImagePreview(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('imagePreview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        document.getElementById('imagePreview').style.display = 'none';
+    }
+}
+
+// Отправка снепшота на сервер
+async function submitSnapshot() {
+    const fileInput = document.getElementById('snapshotImage');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        showUploadError('Выберите изображение');
+        return;
+    }
+
+    const gameId = getGameIdFromUrl();
+    const formData = new FormData();
+    formData.append('image', file);
+
+    // Показываем прогресс
+    document.getElementById('uploadProgress').style.display = 'block';
+    document.getElementById('uploadError').style.display = 'none';
+    document.getElementById('submitSnapshotBtn').disabled = true;
+
+    try {
+        const response = await fetch(`/api/games/${gameId}/snapshots`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Ошибка при добавлении снепшота');
+        }
+
+        const snapshot = await response.json();
+
+        // Добавляем снепшот в текущую партию
+        currentGame.snapshots.push(snapshot);
+        currentGame.snapshotCount = currentGame.snapshots.length;
+
+        // Обновляем отображение
+        renderSnapshots(currentGame.snapshots);
+        renderGameInfo(currentGame);
+        updateControlPanel(currentGame, currentGame.snapshots);
+
+        // Закрываем модальное окно
+        addSnapshotModal.hide();
+
+    } catch (error) {
+        showUploadError(error.message);
+    } finally {
+        document.getElementById('uploadProgress').style.display = 'none';
+        document.getElementById('submitSnapshotBtn').disabled = false;
+    }
+}
+
+// Показать ошибку загрузки
+function showUploadError(message) {
+    const errorDiv = document.getElementById('uploadError');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
 }
 
 // Удаление последнего снепшота
@@ -195,9 +283,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Обработчики кнопок управления
-    document.getElementById('addSnapshotBtn').addEventListener('click', addSnapshot);
+    document.getElementById('addSnapshotBtn').addEventListener('click', openAddSnapshotModal);
     document.getElementById('deleteLastSnapshotBtn').addEventListener('click', deleteLastSnapshot);
     document.getElementById('finishGameBtn').addEventListener('click', finishGame);
+
+    // Обработчики модального окна добавления снепшота
+    document.getElementById('snapshotImage').addEventListener('change', handleImagePreview);
+    document.getElementById('submitSnapshotBtn').addEventListener('click', submitSnapshot);
 
     // Обработчик кнопки выхода
     document.getElementById('logoutBtn').addEventListener('click', (e) => {

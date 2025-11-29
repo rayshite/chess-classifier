@@ -5,10 +5,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from board_service import process_board_image
 from classifier import predict_all_squares
 from database import get_async_session
-from services import get_games_list, get_games_count, get_game_by_id
+from services import get_games_list, get_games_count, get_game_by_id, create_snapshot, process_board_image, predictions_to_fen
 
 app = FastAPI()
 
@@ -118,11 +117,22 @@ async def get_game(
         "createdAt": game.created_at.isoformat()
     }
 
-@app.post("/api/predict")
-async def predict(image: UploadFile = File(...)):
+@app.post("/api/games/{game_id}/snapshots")
+async def add_snapshot(
+    game_id: int,
+    image: UploadFile = File(...),
+    session: AsyncSession = Depends(get_async_session)
+):
     """
-    Принимает изображение шахматной доски и возвращает предсказания.
+    Добавить новый снепшот к партии.
+    Принимает изображение шахматной доски, распознает позицию и сохраняет снепшот.
     """
+    # Проверяем существование партии
+    game = await get_game_by_id(session, game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Партия не найдена")
+
+    # Читаем изображение
     contents = await image.read()
 
     try:
@@ -133,6 +143,18 @@ async def predict(image: UploadFile = File(...)):
     # Классификация каждой клетки
     predictions = predict_all_squares(squares)
 
+    # Преобразуем предсказания в FEN-позицию
+    position = predictions_to_fen(predictions)
+
+    # Создаем снепшот
+    snapshot = await create_snapshot(session, game_id, position)
+
+    # Вычисляем номер хода
+    move_number = len(game.snapshots) + 1
+
     return {
-        "predictions": predictions
+        "id": snapshot.id,
+        "moveNumber": move_number,
+        "position": snapshot.position,
+        "createdAt": snapshot.created_at.isoformat()
     }

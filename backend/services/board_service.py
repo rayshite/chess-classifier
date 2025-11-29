@@ -361,3 +361,50 @@ def process_board_image(image_bytes: bytes) -> dict:
     squares = split_board_to_squares(board, h_lines, v_lines)
 
     return squares
+
+
+def predictions_to_fen(predictions: dict) -> str:
+    """
+    Преобразует словарь предсказаний в FEN-нотацию позиции.
+
+    Args:
+        predictions: Словарь {square_name: piece}
+                     Например: {"a8": "bR", "b8": "bN", ...}
+
+    Returns:
+        Строка позиции в формате FEN
+    """
+    # Маппинг из формата классификатора в FEN
+    # Классификатор: bB, bK, bN, bP, bQ, bR, wB, wK, wN, wP, wQ, wR, empty
+    # FEN: b, k, n, p, q, r (чёрные строчные), B, K, N, P, Q, R (белые заглавные)
+    piece_map = {
+        'empty': '',
+        'wP': 'P', 'wN': 'N', 'wB': 'B', 'wR': 'R', 'wQ': 'Q', 'wK': 'K',
+        'bP': 'p', 'bN': 'n', 'bB': 'b', 'bR': 'r', 'bQ': 'q', 'bK': 'k'
+    }
+
+    fen_rows = []
+    # FEN начинается с 8-го ряда (верхний ряд доски)
+    for row_num in range(8, 0, -1):
+        fen_row = ''
+        empty_count = 0
+        # Колонки от a до h
+        for col in 'abcdefgh':
+            square_name = f"{col}{row_num}"
+            piece_code = predictions.get(square_name, 'empty')
+            piece = piece_map.get(piece_code, '')
+
+            if piece == '':
+                empty_count += 1
+            else:
+                if empty_count > 0:
+                    fen_row += str(empty_count)
+                    empty_count = 0
+                fen_row += piece
+
+        if empty_count > 0:
+            fen_row += str(empty_count)
+        fen_rows.append(fen_row)
+
+    return '/'.join(fen_rows)
+

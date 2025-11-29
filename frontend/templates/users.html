@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Управление пользователями - Шахматные партии{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Навигация назад -->
+    <div class="mb-3">
+        <a href="/" class="text-decoration-none">
+            <i class="bi bi-arrow-left"></i> Назад к списку партий
+        </a>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">Управление пользователями</h4>
+        <button id="addUserBtn" class="btn btn-primary">
+            <i class="bi bi-person-plus"></i> Зарегистрировать пользователя
+        </button>
+    </div>
+
+    <!-- Фильтры -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="d-flex align-items-center gap-2">
+            <label class="mb-0">Роль:</label>
+            <select id="roleFilter" class="form-select form-select-sm" style="width: auto;">
+                <option value="all">Все</option>
+                <option value="student">Ученик</option>
+                <option value="teacher">Учитель</option>
+                <option value="admin">Администратор</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Индикатор загрузки -->
+    <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+    </div>
+
+    <!-- Таблица пользователей -->
+    <table class="table table-hover" id="usersTable" style="display: none;">
+        <thead>
+        <tr>
+            <th>Имя</th>
+            <th>Email</th>
+            <th>Роль</th>
+            <th>Статус</th>
+            <th>Дата регистрации</th>
+        </tr>
+        </thead>
+        <tbody id="usersList">
+            <!-- Пользователи будут добавлены через JavaScript -->
+        </tbody>
+    </table>
+
+    <!-- Пустое состояние -->
+    <div id="emptyState" class="text-center py-5" style="display: none;">
+        <i class="bi bi-people" style="font-size: 3rem; color: #999;"></i>
+        <p class="text-muted mt-3">Пользователей пока нет</p>
+    </div>
+
+    <!-- Пагинация -->
+    <nav aria-label="Навигация по страницам" id="paginationNav" style="display: none;">
+        <ul class="pagination justify-content-center" id="pagination">
+            <!-- Пагинация будет добавлена через JavaScript -->
+        </ul>
+    </nav>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/users.js"></script>
+{% endblock %}

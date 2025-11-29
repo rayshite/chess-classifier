@@ -85,6 +85,14 @@ async def game_page(request: Request, game_id: int):
         "user_name": "Иван Петров"
     })
 
+@app.get("/users")
+async def users_page(request: Request):
+    """Страница управления пользователями"""
+    return templates.TemplateResponse("users.html", {
+        "request": request,
+        "user_name": "Иван Петров"
+    })
+
 @app.get("/api/games/{game_id}")
 async def get_game(
     game_id: int,

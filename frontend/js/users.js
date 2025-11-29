@@ -200,11 +200,6 @@ async function submitUser() {
     }
 }
 
-// Выход из системы
-function logout() {
-    alert('Функция выхода будет реализована позже');
-}
-
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
     // Инициализируем модальное окно
@@ -218,12 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Обработчик кнопки отправки формы
     document.getElementById('submitUserBtn').addEventListener('click', submitUser);
-
-    // Обработчик кнопки выхода
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-        e.preventDefault();
-        logout();
-    });
 
     // Обработчик фильтра по роли
     document.getElementById('roleFilter').addEventListener('change', filterUsers);

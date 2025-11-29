@@ -333,13 +333,6 @@ async function toggleGameStatus() {
     }
 }
 
-// Выход из системы
-function logout() {
-    if (confirm('Вы уверены, что хотите выйти?')) {
-        alert('Функция выхода будет реализована позже');
-    }
-}
-
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', async () => {
     const gameId = getGameIdFromUrl();
@@ -369,10 +362,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Обработчик подтверждения удаления
     document.getElementById('confirmDeleteBtn').addEventListener('click', deleteLastSnapshot);
-
-    // Обработчик кнопки выхода
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-        e.preventDefault();
-        logout();
-    });
 });

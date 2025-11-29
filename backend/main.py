@@ -360,3 +360,11 @@ async def login(
     )
 
     return response
+
+
+@app.post("/api/logout")
+async def logout():
+    """API endpoint для выхода из системы"""
+    response = JSONResponse(content={"message": "Выход выполнен"})
+    response.delete_cookie("user_id")
+    return response

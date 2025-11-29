@@ -130,11 +130,6 @@ function createGame() {
     alert('Функция создания партии будет реализована позже');
 }
 
-// Выход из системы
-function logout() {
-    alert('Функция выхода будет реализована позже');
-}
-
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
     // Загружаем партии
@@ -142,12 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Обработчик кнопки создания партии
     document.getElementById('createGameBtn').addEventListener('click', createGame);
-
-    // Обработчик кнопки выхода
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-        e.preventDefault();
-        logout();
-    });
 
     // Обработчик фильтра
     document.getElementById('statusFilter').addEventListener('change', filterGames);

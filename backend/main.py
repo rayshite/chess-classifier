@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from classifier import predict_all_squares
 from database import get_async_session
-from services import get_games_list, get_games_count, get_game_by_id, create_snapshot, delete_last_snapshot, update_game_status, process_board_image, predictions_to_fen
+from services import get_games_list, get_games_count, get_game_by_id, create_snapshot, delete_last_snapshot, update_game_status, process_board_image, predictions_to_fen, get_users_list, get_users_count
 
 app = FastAPI()
 
@@ -213,3 +213,56 @@ async def change_game_status(
     game = await update_game_status(session, game_id, new_status)
 
     return {"status": game.status.value}
+
+
+@app.get("/api/users")
+async def get_users(
+    page: int = 1,
+    limit: int = 10,
+    role: str | None = None,
+    session: AsyncSession = Depends(get_async_session)
+):
+    """API endpoint для получения списка пользователей с пагинацией и фильтрацией"""
+    from models import UserRole
+
+    # Валидация параметров
+    page = max(1, page)
+    limit = min(max(1, limit), 100)
+
+    # Преобразование роли в enum
+    role_filter = None
+    if role and role != 'all':
+        try:
+            role_filter = UserRole(role)
+        except ValueError:
+            pass
+
+    offset = (page - 1) * limit
+
+    # Получаем пользователей и общее количество
+    users = await get_users_list(session, role=role_filter, limit=limit, offset=offset)
+    total_count = await get_users_count(session, role=role_filter)
+    total_pages = (total_count + limit - 1) // limit if total_count > 0 else 1
+
+    # Преобразуем данные в JSON-сериализуемый формат
+    users_data = [
+        {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "role": user.role.value,
+            "isActive": user.is_active,
+            "createdAt": user.created_at.isoformat()
+        }
+        for user in users
+    ]
+
+    return {
+        "users": users_data,
+        "pagination": {
+            "currentPage": page,
+            "totalPages": total_pages,
+            "totalCount": total_count,
+            "limit": limit
+        }
+    }

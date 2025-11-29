@@ -59,3 +59,9 @@ async def game_page(
 async def users_page(request: Request):
     """Страница управления пользователями"""
     return templates.TemplateResponse("users.html", {"request": request})
+
+
+@router.get("/profile")
+async def profile_page(request: Request):
+    """Страница профиля пользователя"""
+    return templates.TemplateResponse("profile.html", {"request": request})

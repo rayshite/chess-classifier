@@ -118,3 +118,29 @@ async def create_user(
     await session.refresh(user)
 
     return user
+
+
+async def authenticate_user(session: AsyncSession, email: str, password: str) -> User | None:
+    """
+    Аутентификация пользователя по email и паролю.
+
+    Args:
+        session: Сессия БД
+        email: Email пользователя
+        password: Пароль
+
+    Returns:
+        Пользователь, если аутентификация успешна, иначе None
+    """
+    user = await get_user_by_email(session, email)
+
+    if not user:
+        return None
+
+    if not user.is_active:
+        return None
+
+    if user.hashed_password != hash_password(password):
+        return None
+
+    return user

@@ -7,7 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from classifier import predict_all_squares
 from database import get_async_session
-from services import get_games_list, get_games_count, get_game_by_id, create_snapshot, delete_last_snapshot, update_game_status, process_board_image, predictions_to_fen, get_users_list, get_users_count, get_user_by_email, create_user
+from fastapi.responses import JSONResponse
+from services import get_games_list, get_games_count, get_game_by_id, create_snapshot, delete_last_snapshot, update_game_status, process_board_image, predictions_to_fen, get_users_list, get_users_count, get_user_by_email, create_user, authenticate_user
 
 app = FastAPI()
 
@@ -17,6 +18,12 @@ TEMPLATES_DIR = FRONTEND_DIR / "templates"
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
+
+@app.get("/login")
+async def login_page(request: Request):
+    """Страница входа"""
+    return templates.TemplateResponse("login.html", {"request": request})
+
 
 @app.get("/")
 async def home(request: Request):
@@ -315,3 +322,41 @@ async def create_new_user(
         "isActive": user.is_active,
         "createdAt": user.created_at.isoformat()
     }
+
+
+@app.post("/api/login")
+async def login(
+    request: Request,
+    session: AsyncSession = Depends(get_async_session)
+):
+    """API endpoint для аутентификации пользователя"""
+    data = await request.json()
+
+    email = data.get("email", "").strip()
+    password = data.get("password", "")
+
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="Email и пароль обязательны")
+
+    user = await authenticate_user(session, email, password)
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Неверный email или пароль")
+
+    # Создаем ответ с cookie
+    response = JSONResponse(content={
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role.value
+    })
+
+    # Устанавливаем cookie с ID пользователя (простая сессия)
+    response.set_cookie(
+        key="user_id",
+        value=str(user.id),
+        httponly=True,
+        max_age=60 * 60 * 24 * 7  # 7 дней
+    )
+
+    return response

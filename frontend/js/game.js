@@ -130,13 +130,17 @@ function openSnapshotModal(snapshotId) {
 // Управление партией
 function updateControlPanel(game, snapshots) {
     const deleteBtn = document.getElementById('deleteLastSnapshotBtn');
-    const finishBtn = document.getElementById('finishGameBtn');
+    const statusBtn = document.getElementById('finishGameBtn');
 
     // Отключаем кнопку удаления, если нет снепшотов
     deleteBtn.disabled = snapshots.length === 0;
 
-    // Отключаем кнопку завершения, если партия уже завершена
-    finishBtn.disabled = game.status === 'finished';
+    // Обновляем кнопку статуса в зависимости от текущего состояния
+    if (game.status === 'in_progress') {
+        statusBtn.innerHTML = '<i class="bi bi-check-circle"></i> Завершить партию';
+    } else {
+        statusBtn.innerHTML = '<i class="bi bi-play-circle"></i> Возобновить партию';
+    }
 }
 
 // Модальное окно добавления снепшота
@@ -287,15 +291,41 @@ async function deleteLastSnapshot() {
     }
 }
 
-// Завершение партии
-function finishGame() {
-    if (!currentGame || currentGame.status === 'finished') return;
+// Переключение статуса партии
+async function toggleGameStatus() {
+    if (!currentGame) return;
 
-    if (confirm('Вы уверены, что хотите завершить партию?')) {
-        currentGame.status = 'finished';
+    const gameId = getGameIdFromUrl();
+    const statusBtn = document.getElementById('finishGameBtn');
+    const isFinishing = currentGame.status === 'in_progress';
+
+    // Блокируем кнопку на время запроса
+    statusBtn.disabled = true;
+
+    try {
+        const response = await fetch(`/api/games/${gameId}/status`, {
+            method: 'PATCH'
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Ошибка при смене статуса');
+        }
+
+        const data = await response.json();
+
+        // Обновляем локальное состояние
+        currentGame.status = data.status;
+
+        // Обновляем отображение
         renderGameInfo(currentGame);
         updateControlPanel(currentGame, currentGame.snapshots);
-        alert('Партия завершена');
+
+    } catch (error) {
+        alert(error.message);
+        console.error('Failed to toggle game status:', error);
+    } finally {
+        statusBtn.disabled = false;
     }
 }
 
@@ -327,7 +357,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Обработчики кнопок управления
     document.getElementById('addSnapshotBtn').addEventListener('click', openAddSnapshotModal);
     document.getElementById('deleteLastSnapshotBtn').addEventListener('click', openDeleteConfirmModal);
-    document.getElementById('finishGameBtn').addEventListener('click', finishGame);
+    document.getElementById('finishGameBtn').addEventListener('click', toggleGameStatus);
 
     // Обработчики модального окна добавления снепшота
     document.getElementById('snapshotImage').addEventListener('change', handleImagePreview);

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from classifier import predict_all_squares
 from database import get_async_session
-from services import get_games_list, get_games_count, get_game_by_id, create_snapshot, delete_last_snapshot, process_board_image, predictions_to_fen
+from services import get_games_list, get_games_count, get_game_by_id, create_snapshot, delete_last_snapshot, update_game_status, process_board_image, predictions_to_fen
 
 app = FastAPI()
 
@@ -180,3 +180,28 @@ async def remove_last_snapshot(
         raise HTTPException(status_code=404, detail="Снепшотов нет")
 
     return {"message": "Снепшот удалён", "id": snapshot.id}
+
+
+@app.patch("/api/games/{game_id}/status")
+async def change_game_status(
+    game_id: int,
+    session: AsyncSession = Depends(get_async_session)
+):
+    """
+    Переключить статус партии.
+    Если 'in_progress' -> 'finished', если 'finished' -> 'in_progress'.
+    """
+    from models import GameStatus
+
+    # Получаем партию
+    game = await get_game_by_id(session, game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Партия не найдена")
+
+    # Переключаем статус
+    new_status = GameStatus.FINISHED if game.status == GameStatus.IN_PROGRESS else GameStatus.IN_PROGRESS
+
+    # Обновляем статус
+    game = await update_game_status(session, game_id, new_status)
+
+    return {"status": game.status.value}

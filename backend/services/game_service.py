@@ -144,3 +144,25 @@ async def delete_last_snapshot(session: AsyncSession, game_id: int) -> Snapshot 
         await session.commit()
 
     return snapshot
+
+
+async def update_game_status(session: AsyncSession, game_id: int, status: GameStatus) -> Game | None:
+    """
+    Обновить статус партии.
+
+    Args:
+        session: Сессия БД
+        game_id: ID партии
+        status: Новый статус
+
+    Returns:
+        Обновлённая партия или None, если не найдена
+    """
+    game = await get_game_by_id(session, game_id)
+
+    if game:
+        game.status = status
+        await session.commit()
+        await session.refresh(game)
+
+    return game

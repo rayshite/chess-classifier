@@ -7,40 +7,6 @@ function getGameIdFromUrl() {
 // Текущая партия (загружается из API)
 let currentGame = null;
 
-// Моковые данные снепшотов (пока не реализовано получение из БД)
-const mockSnapshots = [
-    {
-        id: 1,
-        moveNumber: 1,
-        position: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR",
-        createdAt: "2025-01-23T10:31:00"
-    },
-    {
-        id: 2,
-        moveNumber: 2,
-        position: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR",
-        createdAt: "2025-01-23T10:32:00"
-    },
-    {
-        id: 3,
-        moveNumber: 3,
-        position: "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R",
-        createdAt: "2025-01-23T10:33:00"
-    },
-    {
-        id: 4,
-        moveNumber: 4,
-        position: "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R",
-        createdAt: "2025-01-23T10:34:00"
-    },
-    {
-        id: 5,
-        moveNumber: 5,
-        position: "rnbqkb1r/pppp1ppp/5n2/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R",
-        createdAt: "2025-01-23T10:35:00"
-    }
-];
-
 // Загрузка информации о партии из API
 async function loadGameInfo(gameId) {
     try {
@@ -139,7 +105,8 @@ let modalBoard = null;
 
 // Открытие модального окна снепшота
 function openSnapshotModal(snapshotId) {
-    const snapshot = mockSnapshots.find(s => s.id === snapshotId);
+    if (!currentGame || !currentGame.snapshots) return;
+    const snapshot = currentGame.snapshots.find(s => s.id === snapshotId);
     if (!snapshot) return;
 
     document.getElementById('modalSnapshotNumber').textContent = snapshot.id;
@@ -179,16 +146,14 @@ function addSnapshot() {
 
 // Удаление последнего снепшота
 function deleteLastSnapshot() {
-    if (mockSnapshots.length === 0) return;
+    if (!currentGame || !currentGame.snapshots || currentGame.snapshots.length === 0) return;
 
     if (confirm('Вы уверены, что хотите удалить последний снепшот?')) {
-        mockSnapshots.pop();
-        renderSnapshots(mockSnapshots);
-        if (currentGame) {
-            currentGame.snapshotCount = mockSnapshots.length;
-            renderGameInfo(currentGame);
-            updateControlPanel(currentGame, mockSnapshots);
-        }
+        currentGame.snapshots.pop();
+        currentGame.snapshotCount = currentGame.snapshots.length;
+        renderSnapshots(currentGame.snapshots);
+        renderGameInfo(currentGame);
+        updateControlPanel(currentGame, currentGame.snapshots);
     }
 }
 
@@ -199,7 +164,7 @@ function finishGame() {
     if (confirm('Вы уверены, что хотите завершить партию?')) {
         currentGame.status = 'finished';
         renderGameInfo(currentGame);
-        updateControlPanel(currentGame, mockSnapshots);
+        updateControlPanel(currentGame, currentGame.snapshots);
         alert('Партия завершена');
     }
 }
@@ -222,8 +187,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Отображаем информацию о партии
         renderGameInfo(currentGame);
-        renderSnapshots(mockSnapshots); // Пока используем моковые снепшоты
-        updateControlPanel(currentGame, mockSnapshots);
+        renderSnapshots(currentGame.snapshots);
+        updateControlPanel(currentGame, currentGame.snapshots);
     } catch (error) {
         document.getElementById('gameTitle').textContent = 'Ошибка загрузки';
         console.error('Failed to load game:', error);

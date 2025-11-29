@@ -97,6 +97,16 @@ async def get_game(
     if not game:
         raise HTTPException(status_code=404, detail="Партия не найдена")
 
+    snapshots_data = [
+        {
+            "id": snapshot.id,
+            "moveNumber": idx + 1,
+            "position": snapshot.position,
+            "createdAt": snapshot.created_at.isoformat()
+        }
+        for idx, snapshot in enumerate(game.snapshots)
+    ]
+
     return {
         "id": game.id,
         "title": game.title,
@@ -104,6 +114,7 @@ async def get_game(
         "player1": {"id": game.player1.id, "name": game.player1.name},
         "player2": {"id": game.player2.id, "name": game.player2.name},
         "snapshotCount": len(game.snapshots),
+        "snapshots": snapshots_data,
         "createdAt": game.created_at.isoformat()
     }
 

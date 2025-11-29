@@ -5,9 +5,10 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from auth import current_active_user
 from classifier import predict_all_squares
 from database import get_async_session
-from models import GameStatus
+from models import GameStatus, User, UserRole
 from services import (
     get_games_list,
     get_games_count,
@@ -27,7 +28,8 @@ async def get_games(
     page: int = 1,
     limit: int = 2,
     status: str | None = None,
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user)
 ):
     """Получить список партий с пагинацией и фильтрацией"""
     page = max(1, page)
@@ -40,10 +42,13 @@ async def get_games(
         except ValueError:
             pass
 
+    # Ученики видят только свои партии
+    user_id_filter = user.id if user.role == UserRole.STUDENT else None
+
     offset = (page - 1) * limit
 
-    games = await get_games_list(session, status=status_filter, limit=limit, offset=offset)
-    total_count = await get_games_count(session, status=status_filter)
+    games = await get_games_list(session, status=status_filter, user_id=user_id_filter, limit=limit, offset=offset)
+    total_count = await get_games_count(session, status=status_filter, user_id=user_id_filter)
     total_pages = (total_count + limit - 1) // limit if total_count > 0 else 1
 
     games_data = [

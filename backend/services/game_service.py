@@ -12,6 +12,7 @@ from models import Game, GameStatus, Snapshot
 async def get_games_list(
     session: AsyncSession,
     status: GameStatus | None = None,
+    user_id: int | None = None,
     limit: int = 100,
     offset: int = 0
 ):
@@ -21,12 +22,15 @@ async def get_games_list(
     Args:
         session: Сессия БД
         status: Фильтр по статусу (опционально)
+        user_id: ID пользователя для фильтрации (только его партии)
         limit: Максимальное количество записей
         offset: Смещение для пагинации
 
     Returns:
         Список партий с загруженными связями (player1, player2, snapshots)
     """
+    from sqlalchemy import or_
+
     query = (
         select(Game)
         .options(
@@ -41,6 +45,9 @@ async def get_games_list(
 
     if status:
         query = query.where(Game.status == status.value)
+
+    if user_id:
+        query = query.where(or_(Game.player1_id == user_id, Game.player2_id == user_id))
 
     result = await session.execute(query)
     games = result.scalars().all()
@@ -75,21 +82,27 @@ async def get_game_by_id(session: AsyncSession, game_id: int):
     return game
 
 
-async def get_games_count(session: AsyncSession, status: GameStatus | None = None):
+async def get_games_count(session: AsyncSession, status: GameStatus | None = None, user_id: int | None = None):
     """
     Получить количество партий.
 
     Args:
         session: Сессия БД
         status: Фильтр по статусу (опционально)
+        user_id: ID пользователя для фильтрации (только его партии)
 
     Returns:
         Количество партий
     """
+    from sqlalchemy import or_
+
     query = select(func.count(Game.id))
 
     if status:
         query = query.where(Game.status == status.value)
+
+    if user_id:
+        query = query.where(or_(Game.player1_id == user_id, Game.player2_id == user_id))
 
     result = await session.execute(query)
     count = result.scalar()

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from classifier import predict_all_squares
 from database import get_async_session
-from services import get_games_list, get_games_count, get_game_by_id, create_snapshot, process_board_image, predictions_to_fen
+from services import get_games_list, get_games_count, get_game_by_id, create_snapshot, delete_last_snapshot, process_board_image, predictions_to_fen
 
 app = FastAPI()
 
@@ -158,3 +158,25 @@ async def add_snapshot(
         "position": snapshot.position,
         "createdAt": snapshot.created_at.isoformat()
     }
+
+
+@app.delete("/api/games/{game_id}/snapshots/last")
+async def remove_last_snapshot(
+    game_id: int,
+    session: AsyncSession = Depends(get_async_session)
+):
+    """
+    Удалить последний снепшот партии.
+    """
+    # Проверяем существование партии
+    game = await get_game_by_id(session, game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Партия не найдена")
+
+    # Удаляем последний снепшот
+    snapshot = await delete_last_snapshot(session, game_id)
+
+    if not snapshot:
+        raise HTTPException(status_code=404, detail="Снепшотов нет")
+
+    return {"message": "Снепшот удалён", "id": snapshot.id}

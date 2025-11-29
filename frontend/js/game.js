@@ -232,16 +232,58 @@ function showUploadError(message) {
     errorDiv.style.display = 'block';
 }
 
-// Удаление последнего снепшота
-function deleteLastSnapshot() {
+// Модальное окно подтверждения удаления
+let deleteConfirmModal = null;
+
+// Открытие модального окна подтверждения удаления
+function openDeleteConfirmModal() {
     if (!currentGame || !currentGame.snapshots || currentGame.snapshots.length === 0) return;
 
-    if (confirm('Вы уверены, что хотите удалить последний снепшот?')) {
+    if (!deleteConfirmModal) {
+        deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    }
+
+    deleteConfirmModal.show();
+}
+
+// Удаление последнего снепшота
+async function deleteLastSnapshot() {
+    const gameId = getGameIdFromUrl();
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+
+    // Блокируем кнопку на время запроса
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Удаление...';
+
+    try {
+        const response = await fetch(`/api/games/${gameId}/snapshots/last`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Ошибка при удалении снепшота');
+        }
+
+        // Удаляем снепшот из локального состояния
         currentGame.snapshots.pop();
         currentGame.snapshotCount = currentGame.snapshots.length;
+
+        // Обновляем отображение
         renderSnapshots(currentGame.snapshots);
         renderGameInfo(currentGame);
         updateControlPanel(currentGame, currentGame.snapshots);
+
+        // Закрываем модальное окно
+        deleteConfirmModal.hide();
+
+    } catch (error) {
+        alert(error.message);
+        console.error('Failed to delete snapshot:', error);
+    } finally {
+        // Восстанавливаем кнопку
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="bi bi-trash"></i> Удалить';
     }
 }
 
@@ -284,12 +326,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Обработчики кнопок управления
     document.getElementById('addSnapshotBtn').addEventListener('click', openAddSnapshotModal);
-    document.getElementById('deleteLastSnapshotBtn').addEventListener('click', deleteLastSnapshot);
+    document.getElementById('deleteLastSnapshotBtn').addEventListener('click', openDeleteConfirmModal);
     document.getElementById('finishGameBtn').addEventListener('click', finishGame);
 
     // Обработчики модального окна добавления снепшота
     document.getElementById('snapshotImage').addEventListener('change', handleImagePreview);
     document.getElementById('submitSnapshotBtn').addEventListener('click', submitSnapshot);
+
+    // Обработчик подтверждения удаления
+    document.getElementById('confirmDeleteBtn').addEventListener('click', deleteLastSnapshot);
 
     // Обработчик кнопки выхода
     document.getElementById('logoutBtn').addEventListener('click', (e) => {

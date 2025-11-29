@@ -115,3 +115,32 @@ async def create_snapshot(session: AsyncSession, game_id: int, position: str):
     await session.refresh(snapshot)
 
     return snapshot
+
+
+async def delete_last_snapshot(session: AsyncSession, game_id: int) -> Snapshot | None:
+    """
+    Удалить последний снепшот партии.
+
+    Args:
+        session: Сессия БД
+        game_id: ID партии
+
+    Returns:
+        Удалённый снепшот или None, если снепшотов нет
+    """
+    # Находим последний снепшот по дате создания
+    query = (
+        select(Snapshot)
+        .where(Snapshot.game_id == game_id)
+        .order_by(Snapshot.created_at.desc())
+        .limit(1)
+    )
+
+    result = await session.execute(query)
+    snapshot = result.scalar_one_or_none()
+
+    if snapshot:
+        await session.delete(snapshot)
+        await session.commit()
+
+    return snapshot

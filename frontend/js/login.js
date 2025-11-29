@@ -20,12 +20,16 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     loginBtn.textContent = 'Вход...';
 
     try {
-        const response = await fetch('/api/login', {
+        const formData = new URLSearchParams();
+        formData.append('username', email);
+        formData.append('password', password);
+
+        const response = await fetch('/api/auth/login', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: JSON.stringify({ email, password })
+            body: formData
         });
 
         if (!response.ok) {

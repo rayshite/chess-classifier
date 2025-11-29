@@ -3,12 +3,13 @@
 // Выход из системы
 async function logout() {
     try {
-        await fetch('/api/logout', { method: 'POST' });
-        window.location.href = '/login';
+        const response = await fetch('/api/auth/logout', { method: 'POST' });
+        console.log('Logout response:', response.status);
     } catch (error) {
         console.error('Ошибка выхода:', error);
-        window.location.href = '/login';
     }
+    // Всегда перенаправляем на логин
+    window.location.href = '/login';
 }
 
 // Загрузка текущего пользователя

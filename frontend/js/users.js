@@ -174,7 +174,7 @@ async function submitUser() {
     submitBtn.textContent = 'Регистрация...';
 
     try {
-        const response = await fetch('/api/users', {
+        const response = await fetch('/api/auth/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

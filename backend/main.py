@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
+from auth import fastapi_users, get_user_manager, auth_backend
 from database import get_async_session
 from models import UserRole
 from routers import pages_router, games_router, users_router, auth_router
@@ -28,16 +29,26 @@ async def admin_redirect_middleware(request: Request, call_next):
         path == "/users"):
         return await call_next(request)
 
-    # Проверяем авторизацию админа
-    user_id = request.cookies.get("user_id")
-    if user_id:
+    # Проверяем авторизацию админа через cookie "auth" (JWT в cookie)
+    auth_cookie = request.cookies.get("auth")
+    if auth_cookie:
         try:
-            async for session in get_async_session():
-                user = await get_user_by_id(session, int(user_id))
-                if user and user.role == UserRole.ADMIN:
-                    return RedirectResponse(url="/users", status_code=302)
-                break
-        except (ValueError, Exception):
+            import jwt
+            from auth import SECRET
+            payload = jwt.decode(
+                auth_cookie,
+                SECRET,
+                algorithms=["HS256"],
+                audience="fastapi-users:auth"
+            )
+            user_id = payload.get("sub")
+            if user_id:
+                async for session in get_async_session():
+                    user = await get_user_by_id(session, int(user_id))
+                    if user and user.role == UserRole.ADMIN:
+                        return RedirectResponse(url="/users", status_code=302)
+                    break
+        except Exception:
             pass
 
     return await call_next(request)

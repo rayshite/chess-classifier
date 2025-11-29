@@ -4,7 +4,6 @@ from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from auth import fastapi_users, get_user_manager, auth_backend
 from database import get_async_session
 from models import UserRole
 from routers import pages_router, games_router, users_router, auth_router

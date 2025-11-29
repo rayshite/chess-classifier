@@ -23,6 +23,23 @@ from services import (
 router = APIRouter(prefix="/api/games", tags=["games"])
 
 
+async def get_game_with_access_check(
+    game_id: int,
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user)
+):
+    """Получить партию с проверкой доступа."""
+    game = await get_game_by_id(session, game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="Партия не найдена")
+
+    if user.role == UserRole.STUDENT:
+        if game.player1_id != user.id and game.player2_id != user.id:
+            raise HTTPException(status_code=403, detail="Нет доступа к этой партии")
+
+    return game
+
+
 @router.get("")
 async def get_games(
     page: int = 1,
@@ -77,15 +94,9 @@ async def get_games(
 
 @router.get("/{game_id}")
 async def get_game(
-    game_id: int,
-    session: AsyncSession = Depends(get_async_session)
+    game = Depends(get_game_with_access_check)
 ):
     """Получить информацию о партии по ID"""
-    game = await get_game_by_id(session, game_id)
-
-    if not game:
-        raise HTTPException(status_code=404, detail="Партия не найдена")
-
     snapshots_data = [
         {
             "id": snapshot.id,
@@ -110,15 +121,11 @@ async def get_game(
 
 @router.post("/{game_id}/snapshots")
 async def add_snapshot(
-    game_id: int,
     image: UploadFile = File(...),
+    game = Depends(get_game_with_access_check),
     session: AsyncSession = Depends(get_async_session)
 ):
     """Добавить новый снепшот к партии"""
-    game = await get_game_by_id(session, game_id)
-    if not game:
-        raise HTTPException(status_code=404, detail="Партия не найдена")
-
     contents = await image.read()
 
     try:
@@ -128,7 +135,7 @@ async def add_snapshot(
 
     predictions = predict_all_squares(squares)
     position = predictions_to_fen(predictions)
-    snapshot = await create_snapshot(session, game_id, position)
+    snapshot = await create_snapshot(session, game.id, position)
     move_number = len(game.snapshots) + 1
 
     return {
@@ -141,15 +148,11 @@ async def add_snapshot(
 
 @router.delete("/{game_id}/snapshots/last")
 async def remove_last_snapshot(
-    game_id: int,
+    game = Depends(get_game_with_access_check),
     session: AsyncSession = Depends(get_async_session)
 ):
     """Удалить последний снепшот партии"""
-    game = await get_game_by_id(session, game_id)
-    if not game:
-        raise HTTPException(status_code=404, detail="Партия не найдена")
-
-    snapshot = await delete_last_snapshot(session, game_id)
+    snapshot = await delete_last_snapshot(session, game.id)
 
     if not snapshot:
         raise HTTPException(status_code=404, detail="Снепшотов нет")
@@ -159,15 +162,11 @@ async def remove_last_snapshot(
 
 @router.patch("/{game_id}/status")
 async def change_game_status(
-    game_id: int,
+    game = Depends(get_game_with_access_check),
     session: AsyncSession = Depends(get_async_session)
 ):
     """Переключить статус партии"""
-    game = await get_game_by_id(session, game_id)
-    if not game:
-        raise HTTPException(status_code=404, detail="Партия не найдена")
-
     new_status = GameStatus.FINISHED if game.status == GameStatus.IN_PROGRESS else GameStatus.IN_PROGRESS
-    game = await update_game_status(session, game_id, new_status)
+    game = await update_game_status(session, game.id, new_status)
 
     return {"status": game.status.value}

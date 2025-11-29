@@ -4,8 +4,15 @@
 
 from pathlib import Path
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from auth import current_active_user
+from database import get_async_session
+from models import User, UserRole
+from services import get_game_by_id
 
 router = APIRouter()
 
@@ -28,8 +35,23 @@ async def home(request: Request):
 
 
 @router.get("/games/{game_id}")
-async def game_page(request: Request, game_id: int):
+async def game_page(
+    request: Request,
+    game_id: int,
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user)
+):
     """Страница партии"""
+    game = await get_game_by_id(session, game_id)
+
+    if not game:
+        return RedirectResponse(url="/", status_code=302)
+
+    # Ученики могут видеть только свои партии
+    if user.role == UserRole.STUDENT:
+        if game.player1_id != user.id and game.player2_id != user.id:
+            return RedirectResponse(url="/", status_code=302)
+
     return templates.TemplateResponse("game.html", {"request": request})
 
 

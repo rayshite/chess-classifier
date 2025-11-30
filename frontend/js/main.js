@@ -41,7 +41,7 @@ async function loadGames(page = 1, status = 'all') {
     } catch (error) {
         console.error('Ошибка:', error);
         document.getElementById('loading').style.display = 'none';
-        alert('Не удалось загрузить партии. Проверьте подключение к серверу.');
+        showError('Не удалось загрузить партии.');
     }
 }
 
@@ -167,8 +167,8 @@ async function submitGame() {
             },
             body: JSON.stringify({
                 title: title,
-                player1_id: parseInt(player1Id),
-                player2_id: parseInt(player2Id)
+                player1Id: parseInt(player1Id),
+                player2Id: parseInt(player2Id)
             })
         });
 

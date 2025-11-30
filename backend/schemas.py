@@ -34,7 +34,7 @@ class UserUpdateByAdmin(BaseModel):
     name: str | None = None
     email: EmailStr | None = None
     role: str | None = None
-    is_active: bool | None = None
+    isActive: bool | None = None
 
 
 class UserCreateByAdmin(BaseModel):
@@ -53,5 +53,5 @@ class UserUpdateSelf(BaseModel):
 class GameCreate(BaseModel):
     """Схема создания партии."""
     title: str
-    player1_id: int
-    player2_id: int
+    player1Id: int
+    player2Id: int

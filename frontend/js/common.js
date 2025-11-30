@@ -18,6 +18,30 @@ function formatDate(isoString) {
     });
 }
 
+// Форматирование даты и времени (в московском часовом поясе)
+function formatDateTime(isoString) {
+    const date = new Date(isoString);
+    return date.toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Europe/Moscow'
+    });
+}
+
+// Показать модальное окно ошибки
+let errorModal = null;
+
+function showError(message) {
+    if (!errorModal) {
+        errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+    }
+    document.getElementById('errorMessage').textContent = message;
+    errorModal.show();
+}
+
 // Рендеринг пагинации
 function renderPagination(pagination, onPageChange) {
     const { currentPage, totalPages } = pagination;

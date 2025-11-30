@@ -24,24 +24,12 @@ async function loadGameInfo(gameId) {
     }
 }
 
-// Форматирование даты
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-
 // Отображение информации о партии
 function renderGameInfo(game) {
     document.getElementById('gameTitle').textContent = game.title;
     document.getElementById('player1Name').textContent = game.player1.name;
     document.getElementById('player2Name').textContent = game.player2.name;
-    document.getElementById('createdAt').textContent = formatDate(game.createdAt);
+    document.getElementById('createdAt').textContent = formatDateTime(game.createdAt);
     document.getElementById('snapshotCount').textContent = game.snapshotCount;
 
     const statusBadge = document.getElementById('gameStatus');
@@ -62,7 +50,7 @@ function createSnapshotCard(snapshot) {
                 <div id="board-${snapshot.id}" style="width: 100%"></div>
                 <div class="card-body">
                     <h6 class="card-title">Ход ${snapshot.moveNumber}</h6>
-                    <p class="card-text text-muted small">${formatDate(snapshot.createdAt)}</p>
+                    <p class="card-text text-muted small">${formatDateTime(snapshot.createdAt)}</p>
                 </div>
             </div>
         </div>
@@ -337,7 +325,7 @@ async function deleteLastSnapshot() {
         deleteConfirmModal.hide();
 
     } catch (error) {
-        alert(error.message);
+        showError(error.message);
         console.error('Failed to delete snapshot:', error);
     } finally {
         // Восстанавливаем кнопку
@@ -377,7 +365,7 @@ async function toggleGameStatus() {
         updateControlPanel(currentGame, currentGame.snapshots);
 
     } catch (error) {
-        alert(error.message);
+        showError(error.message);
         console.error('Failed to toggle game status:', error);
     } finally {
         statusBtn.disabled = false;

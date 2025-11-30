@@ -52,17 +52,17 @@ async def create_new_game(
     """Создать новую партию."""
     # Ученик должен быть одним из игроков
     if user.role == UserRole.STUDENT:
-        if data.player1_id != user.id and data.player2_id != user.id:
+        if data.player1Id != user.id and data.player2Id != user.id:
             raise HTTPException(status_code=400, detail="Вы должны быть одним из игроков")
 
-    game = await create_game(session, data.title, data.player1_id, data.player2_id)
+    game = await create_game(session, data.title, data.player1Id, data.player2Id)
 
     return {
         "id": game.id,
         "title": game.title,
         "status": game.status.value,
-        "player1_id": game.player1_id,
-        "player2_id": game.player2_id,
+        "player1Id": game.player1_id,
+        "player2Id": game.player2_id,
         "createdAt": game.created_at.isoformat()
     }
 

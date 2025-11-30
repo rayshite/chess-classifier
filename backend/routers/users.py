@@ -173,8 +173,8 @@ async def update_user(
         user.email = data.email
     if data.role is not None:
         user.role = UserRole(data.role)
-    if data.is_active is not None:
-        user.is_active = data.is_active
+    if data.isActive is not None:
+        user.is_active = data.isActive
 
     await session.commit()
     await session.refresh(user)

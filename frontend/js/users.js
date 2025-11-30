@@ -46,7 +46,7 @@ async function loadUsers(page = 1, role = 'all') {
     } catch (error) {
         console.error('Ошибка:', error);
         document.getElementById('loading').style.display = 'none';
-        alert('Не удалось загрузить пользователей. Проверьте подключение к серверу.');
+        showError('Не удалось загрузить пользователей.');
     }
 }
 
@@ -220,7 +220,7 @@ async function saveUser() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ name, email, role, is_active: isActive })
+            body: JSON.stringify({ name, email, role, isActive })
         });
 
         if (!response.ok) {

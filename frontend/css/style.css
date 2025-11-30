@@ -198,3 +198,17 @@ footer {
     margin-top: 10px;
     color: #333;
 }
+
+/* Карусель снепшотов */
+#snapshotCarousel .carousel-control-prev-icon,
+#snapshotCarousel .carousel-control-next-icon {
+    background-color: var(--chess-dark);
+    border-radius: 25%;
+    padding: 20px;
+}
+
+#snapshotCarousel .carousel-control-prev.disabled,
+#snapshotCarousel .carousel-control-next.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}

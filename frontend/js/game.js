@@ -100,28 +100,79 @@ function renderSnapshots(snapshots) {
     }
 }
 
-// Глобальная переменная для доски в модальном окне
-let modalBoard = null;
+// Глобальные переменные для карусели
+let snapshotCarousel = null;
+let carouselBoards = [];
+
+// Создание слайдов карусели
+function buildCarouselSlides() {
+    if (!currentGame || !currentGame.snapshots) return;
+
+    const carouselInner = document.getElementById('carouselInner');
+    carouselInner.innerHTML = currentGame.snapshots.map((snapshot, index) => `
+        <div class="carousel-item ${index === 0 ? 'active' : ''}" data-move="${snapshot.moveNumber}">
+            <div class="d-flex justify-content-center">
+                <div id="carouselBoard-${index}" style="width: 400px"></div>
+            </div>
+        </div>
+    `).join('');
+
+    // Инициализируем доски после рендера
+    setTimeout(() => {
+        carouselBoards = currentGame.snapshots.map((snapshot, index) => {
+            return Chessboard(`carouselBoard-${index}`, {
+                position: snapshot.position,
+                draggable: false,
+                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+            });
+        });
+    }, 100);
+}
+
+// Обновление заголовка и состояния стрелок при смене слайда
+function updateMoveNumber() {
+    const activeSlide = document.querySelector('#snapshotCarousel .carousel-item.active');
+    if (activeSlide) {
+        document.getElementById('modalMoveNumber').textContent = activeSlide.dataset.move;
+    }
+
+    // Обновляем состояние стрелок
+    const items = document.querySelectorAll('#snapshotCarousel .carousel-item');
+    const activeIndex = Array.from(items).findIndex(item => item.classList.contains('active'));
+    const prevBtn = document.querySelector('#snapshotCarousel .carousel-control-prev');
+    const nextBtn = document.querySelector('#snapshotCarousel .carousel-control-next');
+
+    if (activeIndex === 0) {
+        prevBtn.classList.add('disabled');
+    } else {
+        prevBtn.classList.remove('disabled');
+    }
+
+    if (activeIndex === items.length - 1) {
+        nextBtn.classList.add('disabled');
+    } else {
+        nextBtn.classList.remove('disabled');
+    }
+}
 
 // Открытие модального окна снепшота
 function openSnapshotModal(snapshotId) {
     if (!currentGame || !currentGame.snapshots) return;
-    const snapshot = currentGame.snapshots.find(s => s.id === snapshotId);
-    if (!snapshot) return;
+    const index = currentGame.snapshots.findIndex(s => s.id === snapshotId);
+    if (index === -1) return;
 
-    document.getElementById('modalSnapshotNumber').textContent = snapshot.id;
-    document.getElementById('modalMoveNumber').textContent = snapshot.moveNumber;
+    // Строим слайды если ещё не построены
+    buildCarouselSlides();
 
-    // Инициализируем или обновляем доску в модальном окне
-    if (!modalBoard) {
-        modalBoard = Chessboard('modalBoard', {
-            position: snapshot.position,
-            draggable: false,
-            pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
-        });
-    } else {
-        modalBoard.position(snapshot.position);
-    }
+    // Получаем или создаём карусель
+    const carouselEl = document.getElementById('snapshotCarousel');
+    snapshotCarousel = bootstrap.Carousel.getOrCreateInstance(carouselEl);
+
+    // Переходим к нужному слайду
+    setTimeout(() => {
+        snapshotCarousel.to(index);
+        updateMoveNumber();
+    }, 150);
 
     const modal = new bootstrap.Modal(document.getElementById('snapshotModal'));
     modal.show();
@@ -362,4 +413,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Обработчик подтверждения удаления
     document.getElementById('confirmDeleteBtn').addEventListener('click', deleteLastSnapshot);
+
+    // Обработчик смены слайда в карусели
+    document.getElementById('snapshotCarousel').addEventListener('slid.bs.carousel', updateMoveNumber);
 });

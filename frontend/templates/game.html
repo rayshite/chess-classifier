@@ -61,20 +61,27 @@
     </div>
 </div>
 
-<!-- Модальное окно для просмотра снепшота -->
+<!-- Модальное окно для просмотра снепшотов -->
 <div class="modal fade" id="snapshotModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Снепшот #<span id="modalSnapshotNumber"></span></h5>
+                <h5 class="modal-title">Ход <span id="modalMoveNumber"></span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="d-flex justify-content-center">
-                    <div id="modalBoard" style="width: 400px"></div>
-                </div>
-                <div class="mt-3 text-center">
-                    <strong>Ход:</strong> <span id="modalMoveNumber"></span>
+                <div id="snapshotCarousel" class="carousel slide" data-bs-wrap="false">
+                    <div class="carousel-inner" id="carouselInner">
+                        <!-- Слайды будут добавлены через JS -->
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#snapshotCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Предыдущий</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#snapshotCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Следующий</span>
+                    </button>
                 </div>
             </div>
         </div>

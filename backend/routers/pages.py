@@ -2,24 +2,20 @@
 Роутер для HTML страниц.
 """
 
-from pathlib import Path
-
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import current_active_user
+from config import settings
 from database import get_async_session
 from models import User, UserRole
 from services import get_game_by_id
 
 router = APIRouter()
 
-FRONTEND_DIR = Path(__file__).parent.parent.parent / "frontend"
-TEMPLATES_DIR = FRONTEND_DIR / "templates"
-
-templates = Jinja2Templates(directory=TEMPLATES_DIR)
+templates = Jinja2Templates(directory=settings.TEMPLATES_DIR)
 
 
 @router.get("/login")

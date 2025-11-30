@@ -32,6 +32,8 @@ class Settings:
 
     BASE_DIR: Path = Path(__file__).parent.parent
     BACKEND_DIR: Path = Path(__file__).parent
+    FRONTEND_DIR: Path = BASE_DIR / "frontend"
+    TEMPLATES_DIR: Path = FRONTEND_DIR / "templates"
     MODEL_PATH: Path = BACKEND_DIR / "model.keras"
 
 

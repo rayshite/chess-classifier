@@ -75,6 +75,11 @@ function renderUsers(users) {
                 <td>${roleText}</td>
                 <td><span class="badge ${statusClass}">${statusText}</span></td>
                 <td>${formatDate(user.createdAt)}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary" onclick="openEditUserModal(${user.id}, '${user.name}', '${user.email}', '${user.role}', ${user.isActive})">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                </td>
             </tr>
         `;
     }).join('');
@@ -132,8 +137,10 @@ function filterUsers() {
     loadUsers(1, currentRole);
 }
 
-// Модальное окно добавления пользователя
+// Модальные окна
 let addUserModal;
+let editUserModal;
+let tempPasswordModal;
 
 // Открытие формы добавления пользователя
 function openAddUserModal() {
@@ -200,10 +207,99 @@ async function submitUser() {
     }
 }
 
+// Открытие модального окна редактирования
+function openEditUserModal(id, name, email, role, isActive) {
+    document.getElementById('editUserId').value = id;
+    document.getElementById('editUserName').value = name;
+    document.getElementById('editUserEmail').value = email;
+    document.getElementById('editUserRole').value = role;
+    document.getElementById('editUserActive').checked = isActive;
+    document.getElementById('editUserError').style.display = 'none';
+
+    editUserModal.show();
+}
+
+// Сохранение изменений пользователя
+async function saveUser() {
+    const userId = document.getElementById('editUserId').value;
+    const name = document.getElementById('editUserName').value.trim();
+    const email = document.getElementById('editUserEmail').value.trim();
+    const role = document.getElementById('editUserRole').value;
+    const isActive = document.getElementById('editUserActive').checked;
+
+    const errorEl = document.getElementById('editUserError');
+    const saveBtn = document.getElementById('saveUserBtn');
+
+    errorEl.style.display = 'none';
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Сохранение...';
+
+    try {
+        const response = await fetch(`/api/users/${userId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, email, role, is_active: isActive })
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.detail || 'Ошибка сохранения');
+        }
+
+        editUserModal.hide();
+        loadUsers(currentPage, currentRole);
+
+    } catch (error) {
+        errorEl.textContent = error.message;
+        errorEl.style.display = 'block';
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Сохранить';
+    }
+}
+
+// Сброс пароля пользователя
+async function resetPassword() {
+    const userId = document.getElementById('editUserId').value;
+    const resetBtn = document.getElementById('resetPasswordBtn');
+
+    resetBtn.disabled = true;
+    resetBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+    try {
+        const response = await fetch(`/api/users/${userId}/reset-password`, {
+            method: 'POST'
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.detail || 'Ошибка сброса пароля');
+        }
+
+        const data = await response.json();
+
+        // Показываем временный пароль
+        document.getElementById('tempPasswordValue').textContent = data.temporaryPassword;
+        editUserModal.hide();
+        tempPasswordModal.show();
+
+    } catch (error) {
+        document.getElementById('editUserError').textContent = error.message;
+        document.getElementById('editUserError').style.display = 'block';
+    } finally {
+        resetBtn.disabled = false;
+        resetBtn.innerHTML = '<i class="bi bi-key"></i> Сбросить пароль';
+    }
+}
+
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
-    // Инициализируем модальное окно
+    // Инициализируем модальные окна
     addUserModal = new bootstrap.Modal(document.getElementById('addUserModal'));
+    editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+    tempPasswordModal = new bootstrap.Modal(document.getElementById('tempPasswordModal'));
 
     // Загружаем пользователей
     loadUsers(1);
@@ -216,4 +312,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Обработчик фильтра по роли
     document.getElementById('roleFilter').addEventListener('change', filterUsers);
+
+    // Обработчики редактирования
+    document.getElementById('saveUserBtn').addEventListener('click', saveUser);
+    document.getElementById('resetPasswordBtn').addEventListener('click', resetPassword);
 });

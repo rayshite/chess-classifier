@@ -1,5 +1,12 @@
 // Общие функции для всех страниц
 
+// Экранирование HTML для предотвращения XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // Форматирование даты (в московском часовом поясе)
 function formatDate(isoString) {
     const date = new Date(isoString);

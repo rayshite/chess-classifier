@@ -57,8 +57,17 @@ const roleClasses = {
     'admin': 'bg-primary'
 };
 
+// Кэш пользователей для редактирования
+let usersCache = {};
+
 // Рендеринг списка пользователей
 function renderUsers(users) {
+    // Сохраняем данные в кэш
+    usersCache = {};
+    users.forEach(user => {
+        usersCache[user.id] = user;
+    });
+
     const tbody = document.getElementById('usersList');
     tbody.innerHTML = users.map(user => {
         const roleText = roleLabels[user.role] || user.role;
@@ -68,13 +77,13 @@ function renderUsers(users) {
 
         return `
             <tr>
-                <td>${user.name}</td>
-                <td>${user.email}</td>
+                <td>${escapeHtml(user.name)}</td>
+                <td>${escapeHtml(user.email)}</td>
                 <td><span class="badge ${roleClass}">${roleText}</span></td>
                 <td><span class="badge ${statusClass}">${statusText}</span></td>
                 <td>${formatDate(user.createdAt)}</td>
                 <td>
-                    <button class="btn btn-sm btn-primary" onclick="openEditUserModal(${user.id}, '${user.name}', '${user.email}', '${user.role}', ${user.isActive})">
+                    <button class="btn btn-sm btn-primary edit-user-btn" data-user-id="${user.id}">
                         <i class="bi bi-pencil"></i>
                     </button>
                 </td>
@@ -176,12 +185,15 @@ async function submitUser() {
 }
 
 // Открытие модального окна редактирования
-function openEditUserModal(id, name, email, role, isActive) {
-    document.getElementById('editUserId').value = id;
-    document.getElementById('editUserName').value = name;
-    document.getElementById('editUserEmail').value = email;
-    document.getElementById('editUserRole').value = role;
-    document.getElementById('editUserActive').checked = isActive;
+function openEditUserModal(userId) {
+    const user = usersCache[userId];
+    if (!user) return;
+
+    document.getElementById('editUserId').value = user.id;
+    document.getElementById('editUserName').value = user.name;
+    document.getElementById('editUserEmail').value = user.email;
+    document.getElementById('editUserRole').value = user.role;
+    document.getElementById('editUserActive').checked = user.isActive;
     document.getElementById('editUserError').style.display = 'none';
 
     editUserModal.show();
@@ -295,4 +307,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Обработчики редактирования
     document.getElementById('saveUserBtn').addEventListener('click', saveUser);
     document.getElementById('resetPasswordBtn').addEventListener('click', resetPassword);
+
+    // Делегирование событий для кнопок редактирования пользователей
+    document.getElementById('usersList').addEventListener('click', (e) => {
+        const btn = e.target.closest('.edit-user-btn');
+        if (btn) {
+            const userId = parseInt(btn.dataset.userId);
+            openEditUserModal(userId);
+        }
+    });
 });

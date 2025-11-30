@@ -53,10 +53,10 @@ function renderGames(games) {
         const badgeClass = game.status === 'in_progress' ? 'bg-primary' : 'bg-secondary';
 
         return `
-            <tr style="cursor: pointer;" onclick="window.location.href='/games/${game.id}'">
-                <td>${game.title}</td>
-                <td>${game.player1.name}</td>
-                <td>${game.player2.name}</td>
+            <tr class="game-row" style="cursor: pointer;" data-game-id="${game.id}">
+                <td>${escapeHtml(game.title)}</td>
+                <td>${escapeHtml(game.player1.name)}</td>
+                <td>${escapeHtml(game.player2.name)}</td>
                 <td>${game.snapshotCount}</td>
                 <td><span class="badge ${badgeClass}">${statusText}</span></td>
                 <td>${formatDate(game.createdAt)}</td>
@@ -211,4 +211,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Обработчик фильтра
     document.getElementById('statusFilter').addEventListener('change', filterGames);
+
+    // Делегирование событий для кликов по строкам таблицы
+    document.getElementById('gamesList').addEventListener('click', (e) => {
+        const row = e.target.closest('.game-row');
+        if (row) {
+            const gameId = row.dataset.gameId;
+            window.location.href = `/games/${gameId}`;
+        }
+    });
 });

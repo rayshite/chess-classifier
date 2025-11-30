@@ -1,5 +1,56 @@
 // Общие функции для всех страниц
 
+// API клиент с централизованной обработкой ошибок
+const api = {
+    async request(url, options = {}) {
+        try {
+            const response = await fetch(url, options);
+
+            // Редирект на логин при 401
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return null;
+            }
+
+            return response;
+        } catch (error) {
+            console.error('API ошибка:', error);
+            throw error;
+        }
+    },
+
+    async get(url) {
+        return this.request(url);
+    },
+
+    async post(url, data) {
+        return this.request(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+    },
+
+    async postForm(url, formData) {
+        return this.request(url, {
+            method: 'POST',
+            body: formData
+        });
+    },
+
+    async patch(url, data) {
+        return this.request(url, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+    },
+
+    async delete(url) {
+        return this.request(url, { method: 'DELETE' });
+    }
+};
+
 // Маппинг ролей
 const roleLabels = {
     'student': 'Ученик',
@@ -76,8 +127,8 @@ async function loadListData(options) {
             url += `&${filterParam}=${filterValue}`;
         }
 
-        const response = await fetch(url);
-        if (!response.ok) {
+        const response = await api.get(url);
+        if (!response || !response.ok) {
             throw new Error('Ошибка загрузки данных');
         }
 
@@ -170,39 +221,26 @@ function renderPagination(pagination, onPageChange) {
 
 // Выход из системы
 async function logout() {
-    try {
-        const response = await fetch('/api/auth/logout', { method: 'POST' });
-        console.log('Logout response:', response.status);
-    } catch (error) {
-        console.error('Ошибка выхода:', error);
-    }
-    // Всегда перенаправляем на логин
+    await api.request('/api/auth/logout', { method: 'POST' });
     window.location.href = '/login';
 }
 
 // Загрузка текущего пользователя
 async function loadCurrentUser() {
-    try {
-        const response = await fetch('/api/current_user');
-        if (!response.ok) {
-            // Не авторизован - перенаправляем на логин
-            window.location.href = '/login';
-            return null;
-        }
-        const user = await response.json();
-
-        // Обновляем имя в хедере
-        const userNameEl = document.getElementById('userName');
-        if (userNameEl) {
-            userNameEl.textContent = user.name;
-        }
-
-        return user;
-    } catch (error) {
-        console.error('Ошибка загрузки пользователя:', error);
-        window.location.href = '/login';
+    const response = await api.get('/api/current_user');
+    if (!response || !response.ok) {
         return null;
     }
+
+    const user = await response.json();
+
+    // Обновляем имя в хедере
+    const userNameEl = document.getElementById('userName');
+    if (userNameEl) {
+        userNameEl.textContent = user.name;
+    }
+
+    return user;
 }
 
 // Инициализация общих элементов

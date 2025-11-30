@@ -58,8 +58,8 @@ function filterGames() {
 // Загрузка списка игроков для выбора
 async function loadPlayers() {
     try {
-        const response = await fetch('/api/users/players');
-        if (!response.ok) {
+        const response = await api.get('/api/users/players');
+        if (!response || !response.ok) {
             throw new Error('Ошибка загрузки игроков');
         }
 
@@ -137,20 +137,14 @@ async function submitGame() {
     submitBtn.textContent = 'Создание...';
 
     try {
-        const response = await fetch('/api/games', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                title: title,
-                player1Id: parseInt(player1Id),
-                player2Id: parseInt(player2Id)
-            })
+        const response = await api.post('/api/games', {
+            title: title,
+            player1Id: parseInt(player1Id),
+            player2Id: parseInt(player2Id)
         });
 
-        if (!response.ok) {
-            const data = await response.json();
+        if (!response || !response.ok) {
+            const data = response ? await response.json() : {};
             throw new Error(data.detail || 'Ошибка создания партии');
         }
 

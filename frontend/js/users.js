@@ -112,16 +112,10 @@ async function submitUser() {
     submitBtn.textContent = 'Регистрация...';
 
     try {
-        const response = await fetch('/api/users', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ name, email, role })
-        });
+        const response = await api.post('/api/users', { name, email, role });
 
-        if (!response.ok) {
-            const data = await response.json();
+        if (!response || !response.ok) {
+            const data = response ? await response.json() : {};
             let errorMessage = 'Ошибка при создании пользователя';
             if (Array.isArray(data.detail)) {
                 const emailError = data.detail.find(e => e.loc && e.loc.includes('email'));
@@ -185,16 +179,10 @@ async function saveUser() {
     saveBtn.textContent = 'Сохранение...';
 
     try {
-        const response = await fetch(`/api/users/${userId}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ name, email, role, isActive })
-        });
+        const response = await api.patch(`/api/users/${userId}`, { name, email, role, isActive });
 
-        if (!response.ok) {
-            const data = await response.json();
+        if (!response || !response.ok) {
+            const data = response ? await response.json() : {};
             let errorMessage = 'Ошибка сохранения';
             if (Array.isArray(data.detail)) {
                 const emailError = data.detail.find(e => e.loc && e.loc.includes('email'));
@@ -230,12 +218,10 @@ async function resetPassword() {
     resetBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
     try {
-        const response = await fetch(`/api/users/${userId}/reset-password`, {
-            method: 'POST'
-        });
+        const response = await api.request(`/api/users/${userId}/reset-password`, { method: 'POST' });
 
-        if (!response.ok) {
-            const data = await response.json();
+        if (!response || !response.ok) {
+            const data = response ? await response.json() : {};
             throw new Error(data.detail || 'Ошибка сброса пароля');
         }
 

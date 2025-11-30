@@ -9,19 +9,14 @@ let currentGame = null;
 
 // Загрузка информации о партии из API
 async function loadGameInfo(gameId) {
-    try {
-        const response = await fetch(`/api/games/${gameId}`);
-        if (!response.ok) {
-            if (response.status === 404) {
-                throw new Error('Партия не найдена');
-            }
-            throw new Error('Ошибка загрузки партии');
+    const response = await api.get(`/api/games/${gameId}`);
+    if (!response || !response.ok) {
+        if (response && response.status === 404) {
+            throw new Error('Партия не найдена');
         }
-        return await response.json();
-    } catch (error) {
-        console.error('Error loading game:', error);
-        throw error;
+        throw new Error('Ошибка загрузки партии');
     }
+    return await response.json();
 }
 
 // Отображение информации о партии
@@ -240,13 +235,10 @@ async function submitSnapshot() {
     document.getElementById('submitSnapshotBtn').disabled = true;
 
     try {
-        const response = await fetch(`/api/games/${gameId}/snapshots`, {
-            method: 'POST',
-            body: formData
-        });
+        const response = await api.postForm(`/api/games/${gameId}/snapshots`, formData);
 
-        if (!response.ok) {
-            const error = await response.json();
+        if (!response || !response.ok) {
+            const error = response ? await response.json() : {};
             throw new Error(error.detail || 'Ошибка при добавлении снепшота');
         }
 
@@ -303,12 +295,10 @@ async function deleteLastSnapshot() {
     confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Удаление...';
 
     try {
-        const response = await fetch(`/api/games/${gameId}/snapshots/last`, {
-            method: 'DELETE'
-        });
+        const response = await api.delete(`/api/games/${gameId}/snapshots/last`);
 
-        if (!response.ok) {
-            const error = await response.json();
+        if (!response || !response.ok) {
+            const error = response ? await response.json() : {};
             throw new Error(error.detail || 'Ошибка при удалении снепшота');
         }
 
@@ -346,12 +336,10 @@ async function toggleGameStatus() {
     statusBtn.disabled = true;
 
     try {
-        const response = await fetch(`/api/games/${gameId}/status`, {
-            method: 'PATCH'
-        });
+        const response = await api.request(`/api/games/${gameId}/status`, { method: 'PATCH' });
 
-        if (!response.ok) {
-            const error = await response.json();
+        if (!response || !response.ok) {
+            const error = response ? await response.json() : {};
             throw new Error(error.detail || 'Ошибка при смене статуса');
         }
 

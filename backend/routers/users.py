@@ -44,18 +44,26 @@ class UserUpdateSelf(BaseModel):
     password: str | None = None
 
 
-@router.get("/students")
-async def get_students(
+@router.get("/players")
+async def get_players(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_active_user)
 ):
-    """Получить список всех учеников для выбора в партию."""
-    students = await get_users_list(session, role=UserRole.STUDENT, limit=1000, offset=0)
+    """Получить список игроков (ученики и учителя) для выбора в партию."""
+    from sqlalchemy import select, or_
+
+    query = (
+        select(User)
+        .where(or_(User.role == UserRole.STUDENT, User.role == UserRole.TEACHER))
+        .where(User.is_active == True)
+        .order_by(User.name)
+    )
+    result = await session.execute(query)
+    users = result.scalars().all()
 
     return [
-        {"id": student.id, "name": student.name}
-        for student in students
-        if student.is_active
+        {"id": u.id, "name": u.name}
+        for u in users
     ]
 
 

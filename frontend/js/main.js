@@ -2,6 +2,7 @@
 let currentPage = 1;
 let currentStatus = 'all';
 let createGameModal;
+let currentUser = null;
 
 // Загрузка партий с сервера
 async function loadGames(page = 1, status = 'all') {
@@ -126,28 +127,49 @@ function filterGames() {
     loadGames(1, currentStatus);  // Сбрасываем на первую страницу
 }
 
-// Загрузка списка учеников для выбора
-async function loadStudents() {
+// Загрузка списка игроков для выбора
+async function loadPlayers() {
     try {
-        const response = await fetch('/api/users/students');
+        const response = await fetch('/api/users/players');
         if (!response.ok) {
-            throw new Error('Ошибка загрузки учеников');
+            throw new Error('Ошибка загрузки игроков');
         }
 
-        const students = await response.json();
+        const players = await response.json();
 
         const player1Select = document.getElementById('player1');
         const player2Select = document.getElementById('player2');
 
         // Очищаем и заполняем селекты
         const defaultOption = '<option value="">Выберите игрока</option>';
-        const options = students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+        const options = players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
 
         player1Select.innerHTML = defaultOption + options;
         player2Select.innerHTML = defaultOption + options;
 
+        // Для учеников: автоподстановка себя во второе поле при любом изменении первого
+        if (currentUser && currentUser.role === 'student') {
+            player1Select.addEventListener('change', () => {
+                if (player1Select.value && currentUser) {
+                    // Если выбран не текущий пользователь - подставляем себя во второе поле
+                    if (player1Select.value !== currentUser.id) {
+                        player2Select.value = currentUser.id;
+                    }
+                }
+            });
+
+            player2Select.addEventListener('change', () => {
+                if (player2Select.value && currentUser) {
+                    // Если выбран не текущий пользователь - подставляем себя в первое поле
+                    if (player2Select.value !== currentUser.id) {
+                        player1Select.value = currentUser.id;
+                    }
+                }
+            });
+        }
+
     } catch (error) {
-        console.error('Ошибка загрузки учеников:', error);
+        console.error('Ошибка загрузки игроков:', error);
     }
 }
 
@@ -156,7 +178,7 @@ async function openCreateGameModal() {
     document.getElementById('createGameForm').reset();
     document.getElementById('createGameError').style.display = 'none';
 
-    await loadStudents();
+    await loadPlayers();
     createGameModal.show();
 }
 
@@ -220,9 +242,12 @@ async function submitGame() {
 }
 
 // Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Инициализируем модальное окно
     createGameModal = new bootstrap.Modal(document.getElementById('createGameModal'));
+
+    // Загружаем текущего пользователя
+    currentUser = await loadCurrentUser();
 
     // Загружаем партии
     loadGames(1);

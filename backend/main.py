@@ -21,11 +21,12 @@ async def admin_redirect_middleware(request: Request, call_next):
     """Редирект админа на страницу пользователей"""
     path = request.url.path
 
-    # Пропускаем статику, API и страницы логина/users
+    # Пропускаем статику, API и страницы логина/users/profile
     if (path.startswith("/static") or
         path.startswith("/api") or
         path == "/login" or
-        path == "/users"):
+        path == "/users" or
+        path == "/profile"):
         return await call_next(request)
 
     # Проверяем авторизацию админа через cookie "auth" (JWT в cookie)

@@ -14,7 +14,7 @@ async function loadGames(page = 1, status = 'all') {
         document.getElementById('paginationNav').style.display = 'none';
 
         // Запрос к API с фильтром
-        let url = `/api/games?page=${page}&limit=2`;
+        let url = `/api/games?page=${page}`;
         if (status && status !== 'all') {
             url += `&status=${status}`;
         }

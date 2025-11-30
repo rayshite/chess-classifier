@@ -70,13 +70,12 @@ async def get_players(
 @router.get("")
 async def get_users(
     page: int = 1,
-    limit: int = 10,
     role: str | None = None,
     session: AsyncSession = Depends(get_async_session)
 ):
     """Получить список пользователей с пагинацией и фильтрацией"""
     page = max(1, page)
-    limit = min(max(1, limit), 100)
+    limit = 10
 
     role_filter = None
     if role and role != 'all':

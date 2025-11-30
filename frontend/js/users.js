@@ -19,7 +19,7 @@ async function loadUsers(page = 1, role = 'all') {
         document.getElementById('paginationNav').style.display = 'none';
 
         // Запрос к API с фильтром
-        let url = `/api/users?page=${page}&limit=10`;
+        let url = `/api/users?page=${page}`;
         if (role && role !== 'all') {
             url += `&role=${role}`;
         }

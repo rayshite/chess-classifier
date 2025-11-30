@@ -76,14 +76,13 @@ async def create_new_game(
 @router.get("")
 async def get_games(
     page: int = 1,
-    limit: int = 2,
     status: str | None = None,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_active_user)
 ):
     """Получить список партий с пагинацией и фильтрацией"""
     page = max(1, page)
-    limit = min(max(1, limit), 100)
+    limit = 10
 
     status_filter = None
     if status and status != 'all':

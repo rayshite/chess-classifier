@@ -6,42 +6,19 @@ let currentUser = null;
 
 // Загрузка партий с сервера
 async function loadGames(page = 1, status = 'all') {
-    try {
-        // Показываем индикатор загрузки
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('gamesTable').style.display = 'none';
-        document.getElementById('emptyState').style.display = 'none';
-        document.getElementById('paginationNav').style.display = 'none';
-
-        // Запрос к API с фильтром
-        let url = `/api/games?page=${page}`;
-        if (status && status !== 'all') {
-            url += `&status=${status}`;
-        }
-
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('Ошибка загрузки данных');
-        }
-
-        const data = await response.json();
+    const data = await loadListData({
+        apiUrl: '/api/games',
+        filterParam: 'status',
+        filterValue: status,
+        page: page,
+        tableId: 'gamesTable',
+        dataKey: 'games',
+        renderFn: renderGames,
+        onPageChange: changePage,
+        errorMessage: 'Не удалось загрузить партии.'
+    });
+    if (data) {
         currentPage = data.pagination.currentPage;
-
-        // Скрываем индикатор загрузки
-        document.getElementById('loading').style.display = 'none';
-
-        // Отображаем данные
-        if (data.games.length === 0) {
-            document.getElementById('emptyState').style.display = 'block';
-        } else {
-            renderGames(data.games);
-            renderPagination(data.pagination, changePage);
-            document.getElementById('gamesTable').style.display = 'table';
-        }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        document.getElementById('loading').style.display = 'none';
-        showError('Не удалось загрузить партии.');
     }
 }
 

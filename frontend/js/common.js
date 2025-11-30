@@ -49,6 +49,62 @@ function showError(message) {
     errorModal.show();
 }
 
+// Загрузка данных списка с пагинацией и фильтрацией
+async function loadListData(options) {
+    const {
+        apiUrl,
+        filterParam,
+        filterValue,
+        page,
+        tableId,
+        dataKey,
+        renderFn,
+        onPageChange,
+        errorMessage
+    } = options;
+
+    try {
+        // Показываем индикатор загрузки
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById(tableId).style.display = 'none';
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('paginationNav').style.display = 'none';
+
+        // Запрос к API с фильтром
+        let url = `${apiUrl}?page=${page}`;
+        if (filterValue && filterValue !== 'all') {
+            url += `&${filterParam}=${filterValue}`;
+        }
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Ошибка загрузки данных');
+        }
+
+        const data = await response.json();
+
+        // Скрываем индикатор загрузки
+        document.getElementById('loading').style.display = 'none';
+
+        // Отображаем данные
+        const items = data[dataKey];
+        if (items.length === 0) {
+            document.getElementById('emptyState').style.display = 'block';
+        } else {
+            renderFn(items);
+            renderPagination(data.pagination, onPageChange);
+            document.getElementById(tableId).style.display = 'table';
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Ошибка:', error);
+        document.getElementById('loading').style.display = 'none';
+        showError(errorMessage);
+        return null;
+    }
+}
+
 // Рендеринг пагинации
 function renderPagination(pagination, onPageChange) {
     const { currentPage, totalPages } = pagination;

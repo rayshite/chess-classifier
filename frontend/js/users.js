@@ -4,42 +4,19 @@ let currentRole = 'all';
 
 // Загрузка пользователей с сервера
 async function loadUsers(page = 1, role = 'all') {
-    try {
-        // Показываем индикатор загрузки
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('usersTable').style.display = 'none';
-        document.getElementById('emptyState').style.display = 'none';
-        document.getElementById('paginationNav').style.display = 'none';
-
-        // Запрос к API с фильтром
-        let url = `/api/users?page=${page}`;
-        if (role && role !== 'all') {
-            url += `&role=${role}`;
-        }
-
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error('Ошибка загрузки данных');
-        }
-
-        const data = await response.json();
+    const data = await loadListData({
+        apiUrl: '/api/users',
+        filterParam: 'role',
+        filterValue: role,
+        page: page,
+        tableId: 'usersTable',
+        dataKey: 'users',
+        renderFn: renderUsers,
+        onPageChange: changePage,
+        errorMessage: 'Не удалось загрузить пользователей.'
+    });
+    if (data) {
         currentPage = data.pagination.currentPage;
-
-        // Скрываем индикатор загрузки
-        document.getElementById('loading').style.display = 'none';
-
-        // Отображаем данные
-        if (data.users.length === 0) {
-            document.getElementById('emptyState').style.display = 'block';
-        } else {
-            renderUsers(data.users);
-            renderPagination(data.pagination, changePage);
-            document.getElementById('usersTable').style.display = 'table';
-        }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        document.getElementById('loading').style.display = 'none';
-        showError('Не удалось загрузить пользователей.');
     }
 }
 

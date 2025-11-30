@@ -2,13 +2,6 @@
 let currentPage = 1;
 let currentRole = 'all';
 
-// Маппинг ролей
-const roleLabels = {
-    'student': 'Ученик',
-    'teacher': 'Учитель',
-    'admin': 'Администратор'
-};
-
 // Загрузка пользователей с сервера
 async function loadUsers(page = 1, role = 'all') {
     try {

@@ -1,5 +1,12 @@
 // Общие функции для всех страниц
 
+// Маппинг ролей
+const roleLabels = {
+    'student': 'Ученик',
+    'teacher': 'Учитель',
+    'admin': 'Администратор'
+};
+
 // Экранирование HTML для предотвращения XSS
 function escapeHtml(text) {
     const div = document.createElement('div');

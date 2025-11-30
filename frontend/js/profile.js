@@ -1,10 +1,3 @@
-// Маппинг ролей
-const roleLabels = {
-    'student': 'Ученик',
-    'teacher': 'Учитель',
-    'admin': 'Администратор'
-};
-
 // Текущий email пользователя
 let currentEmail = '';
 

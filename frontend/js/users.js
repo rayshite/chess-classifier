@@ -50,16 +50,6 @@ async function loadUsers(page = 1, role = 'all') {
     }
 }
 
-// Форматирование даты
-function formatDate(isoString) {
-    const date = new Date(isoString);
-    return date.toLocaleDateString('ru-RU', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    });
-}
-
 // Классы для ролей
 const roleClasses = {
     'student': 'bg-light text-dark',

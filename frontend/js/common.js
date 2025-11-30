@@ -1,5 +1,16 @@
 // Общие функции для всех страниц
 
+// Форматирование даты (в московском часовом поясе)
+function formatDate(isoString) {
+    const date = new Date(isoString);
+    return date.toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        timeZone: 'Europe/Moscow'
+    });
+}
+
 // Выход из системы
 async function logout() {
     try {

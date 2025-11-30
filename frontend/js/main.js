@@ -45,16 +45,6 @@ async function loadGames(page = 1, status = 'all') {
     }
 }
 
-// Форматирование даты
-function formatDate(isoString) {
-    const date = new Date(isoString);
-    return date.toLocaleDateString('ru-RU', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    });
-}
-
 // Рендеринг списка партий
 function renderGames(games) {
     const tbody = document.getElementById('gamesList');

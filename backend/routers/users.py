@@ -6,9 +6,11 @@ import secrets
 import string
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import current_active_user, require_admin
+from config import settings
 from database import get_async_session
 from models import User, UserRole
 from schemas import UserCreateByAdmin, UserUpdateByAdmin, UserUpdateSelf
@@ -29,8 +31,6 @@ async def get_players(
     user: User = Depends(current_active_user)
 ):
     """Получить список игроков (ученики и учителя) для выбора в партию."""
-    from sqlalchemy import select, or_
-
     query = (
         select(User)
         .where(or_(User.role == UserRole.STUDENT, User.role == UserRole.TEACHER))
@@ -54,7 +54,7 @@ async def get_users(
 ):
     """Получить список пользователей с пагинацией и фильтрацией"""
     page = max(1, page)
-    limit = 10
+    limit = settings.PAGE_LIMIT
 
     role_filter = None
     if role and role != 'all':
@@ -124,7 +124,6 @@ async def create_user(
 ):
     """Создать пользователя с временным паролем (только для админов)."""
     # Проверяем, что email не занят
-    from sqlalchemy import select
     existing = await session.execute(select(User).where(User.email == data.email))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует")

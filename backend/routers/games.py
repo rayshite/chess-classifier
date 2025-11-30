@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import current_active_user
 from classifier import predict_all_squares
+from config import settings
 from database import get_async_session
 from models import GameStatus, User, UserRole
 from schemas import GameCreate
@@ -75,7 +76,7 @@ async def get_games(
 ):
     """Получить список партий с пагинацией и фильтрацией"""
     page = max(1, page)
-    limit = 10
+    limit = settings.PAGE_LIMIT
 
     status_filter = None
     if status and status != 'all':

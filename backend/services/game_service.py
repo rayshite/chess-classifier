@@ -9,6 +9,37 @@ from sqlalchemy.orm import selectinload
 from models import Game, GameStatus, Snapshot
 
 
+async def create_game(
+    session: AsyncSession,
+    title: str,
+    player1_id: int,
+    player2_id: int
+) -> Game:
+    """
+    Создать новую партию.
+
+    Args:
+        session: Сессия БД
+        title: Название партии
+        player1_id: ID первого игрока (белые)
+        player2_id: ID второго игрока (чёрные)
+
+    Returns:
+        Созданная партия
+    """
+    game = Game(
+        title=title,
+        player1_id=player1_id,
+        player2_id=player2_id,
+        status=GameStatus.IN_PROGRESS
+    )
+    session.add(game)
+    await session.commit()
+    await session.refresh(game)
+
+    return game
+
+
 async def get_games_list(
     session: AsyncSession,
     status: GameStatus | None = None,

@@ -56,6 +56,43 @@
         </ul>
     </nav>
 </div>
+
+<!-- Модальное окно создания партии -->
+<div class="modal fade" id="createGameModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Создание партии</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createGameForm">
+                    <div class="mb-3">
+                        <label for="gameTitle" class="form-label">Название партии</label>
+                        <input type="text" class="form-control" id="gameTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="player1" class="form-label">Игрок 1 (Белые)</label>
+                        <select class="form-select" id="player1" required>
+                            <option value="">Выберите игрока</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="player2" class="form-label">Игрок 2 (Чёрные)</label>
+                        <select class="form-select" id="player2" required>
+                            <option value="">Выберите игрока</option>
+                        </select>
+                    </div>
+                </form>
+                <div id="createGameError" class="alert alert-danger" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="submitGameBtn">Создать</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}

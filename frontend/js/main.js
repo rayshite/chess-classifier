@@ -1,6 +1,7 @@
 // Текущая страница и фильтр
 let currentPage = 1;
 let currentStatus = 'all';
+let createGameModal;
 
 // Загрузка партий с сервера
 async function loadGames(page = 1, status = 'all') {
@@ -125,18 +126,112 @@ function filterGames() {
     loadGames(1, currentStatus);  // Сбрасываем на первую страницу
 }
 
-// Создание новой партии
-function createGame() {
-    alert('Функция создания партии будет реализована позже');
+// Загрузка списка учеников для выбора
+async function loadStudents() {
+    try {
+        const response = await fetch('/api/users/students');
+        if (!response.ok) {
+            throw new Error('Ошибка загрузки учеников');
+        }
+
+        const students = await response.json();
+
+        const player1Select = document.getElementById('player1');
+        const player2Select = document.getElementById('player2');
+
+        // Очищаем и заполняем селекты
+        const defaultOption = '<option value="">Выберите игрока</option>';
+        const options = students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+        player1Select.innerHTML = defaultOption + options;
+        player2Select.innerHTML = defaultOption + options;
+
+    } catch (error) {
+        console.error('Ошибка загрузки учеников:', error);
+    }
+}
+
+// Открытие модального окна создания партии
+async function openCreateGameModal() {
+    document.getElementById('createGameForm').reset();
+    document.getElementById('createGameError').style.display = 'none';
+
+    await loadStudents();
+    createGameModal.show();
+}
+
+// Отправка формы создания партии
+async function submitGame() {
+    const title = document.getElementById('gameTitle').value.trim();
+    const player1Id = document.getElementById('player1').value;
+    const player2Id = document.getElementById('player2').value;
+
+    const errorEl = document.getElementById('createGameError');
+    errorEl.style.display = 'none';
+
+    // Валидация
+    if (!title || !player1Id || !player2Id) {
+        errorEl.textContent = 'Заполните все поля';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    if (player1Id === player2Id) {
+        errorEl.textContent = 'Игроки должны быть разными';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    const submitBtn = document.getElementById('submitGameBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Создание...';
+
+    try {
+        const response = await fetch('/api/games', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title: title,
+                player1_id: parseInt(player1Id),
+                player2_id: parseInt(player2Id)
+            })
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.detail || 'Ошибка создания партии');
+        }
+
+        const game = await response.json();
+
+        createGameModal.hide();
+        // Переход на страницу созданной партии
+        window.location.href = `/games/${game.id}`;
+
+    } catch (error) {
+        errorEl.textContent = error.message;
+        errorEl.style.display = 'block';
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Создать';
+    }
 }
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
+    // Инициализируем модальное окно
+    createGameModal = new bootstrap.Modal(document.getElementById('createGameModal'));
+
     // Загружаем партии
     loadGames(1);
 
     // Обработчик кнопки создания партии
-    document.getElementById('createGameBtn').addEventListener('click', createGame);
+    document.getElementById('createGameBtn').addEventListener('click', openCreateGameModal);
+
+    // Обработчик отправки формы создания партии
+    document.getElementById('submitGameBtn').addEventListener('click', submitGame);
 
     // Обработчик фильтра
     document.getElementById('statusFilter').addEventListener('change', filterGames);

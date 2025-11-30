@@ -44,6 +44,21 @@ class UserUpdateSelf(BaseModel):
     password: str | None = None
 
 
+@router.get("/students")
+async def get_students(
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user)
+):
+    """Получить список всех учеников для выбора в партию."""
+    students = await get_users_list(session, role=UserRole.STUDENT, limit=1000, offset=0)
+
+    return [
+        {"id": student.id, "name": student.name}
+        for student in students
+        if student.is_active
+    ]
+
+
 @router.get("")
 async def get_users(
     page: int = 1,

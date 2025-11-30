@@ -3,6 +3,7 @@
 """
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import current_active_user
@@ -13,6 +14,7 @@ from services import (
     get_games_list,
     get_games_count,
     get_game_by_id,
+    create_game,
     create_snapshot,
     delete_last_snapshot,
     update_game_status,
@@ -21,6 +23,13 @@ from services import (
 )
 
 router = APIRouter(prefix="/api/games", tags=["games"])
+
+
+class GameCreate(BaseModel):
+    """Схема создания партии."""
+    title: str
+    player1_id: int
+    player2_id: int
 
 
 async def get_game_with_access_check(
@@ -38,6 +47,30 @@ async def get_game_with_access_check(
             raise HTTPException(status_code=403, detail="Нет доступа к этой партии")
 
     return game
+
+
+@router.post("")
+async def create_new_game(
+    data: GameCreate,
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user)
+):
+    """Создать новую партию."""
+    # Ученик должен быть одним из игроков
+    if user.role == UserRole.STUDENT:
+        if data.player1_id != user.id and data.player2_id != user.id:
+            raise HTTPException(status_code=400, detail="Вы должны быть одним из игроков")
+
+    game = await create_game(session, data.title, data.player1_id, data.player2_id)
+
+    return {
+        "id": game.id,
+        "title": game.title,
+        "status": game.status.value,
+        "player1_id": game.player1_id,
+        "player2_id": game.player2_id,
+        "createdAt": game.created_at.isoformat()
+    }
 
 
 @router.get("")

@@ -29,8 +29,10 @@ async def login_page(request: Request):
 
 
 @router.get("/")
-async def home(request: Request):
+async def home(request: Request, user: User = Depends(current_active_user)):
     """Главная страница"""
+    if user.role == UserRole.ADMIN:
+        return RedirectResponse(url="/users", status_code=302)
     return templates.TemplateResponse("index.html", {"request": request})
 
 
@@ -42,6 +44,9 @@ async def game_page(
     user: User = Depends(current_active_user)
 ):
     """Страница партии"""
+    if user.role == UserRole.ADMIN:
+        return RedirectResponse(url="/users", status_code=302)
+
     game = await get_game_by_id(session, game_id)
 
     if not game:

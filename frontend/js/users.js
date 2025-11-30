@@ -40,7 +40,7 @@ async function loadUsers(page = 1, role = 'all') {
             document.getElementById('emptyState').style.display = 'block';
         } else {
             renderUsers(data.users);
-            renderPagination(data.pagination);
+            renderPagination(data.pagination, changePage);
             document.getElementById('usersTable').style.display = 'table';
         }
     } catch (error) {
@@ -81,45 +81,6 @@ function renderUsers(users) {
             </tr>
         `;
     }).join('');
-}
-
-// Рендеринг пагинации
-function renderPagination(pagination) {
-    const { currentPage, totalPages } = pagination;
-
-    if (totalPages <= 1) {
-        document.getElementById('paginationNav').style.display = 'none';
-        return;
-    }
-
-    const paginationEl = document.getElementById('pagination');
-    let html = '';
-
-    // Кнопка "Назад"
-    html += `
-        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-            <a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;">Назад</a>
-        </li>
-    `;
-
-    // Номера страниц
-    for (let i = 1; i <= totalPages; i++) {
-        html += `
-            <li class="page-item ${i === currentPage ? 'active' : ''}">
-                <a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>
-            </li>
-        `;
-    }
-
-    // Кнопка "Вперёд"
-    html += `
-        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-            <a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;">Вперёд</a>
-        </li>
-    `;
-
-    paginationEl.innerHTML = html;
-    document.getElementById('paginationNav').style.display = 'block';
 }
 
 // Переключение страницы

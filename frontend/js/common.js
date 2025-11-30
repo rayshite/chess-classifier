@@ -11,6 +11,69 @@ function formatDate(isoString) {
     });
 }
 
+// Рендеринг пагинации
+function renderPagination(pagination, onPageChange) {
+    const { currentPage, totalPages } = pagination;
+
+    if (totalPages <= 1) {
+        document.getElementById('paginationNav').style.display = 'none';
+        return;
+    }
+
+    const paginationEl = document.getElementById('pagination');
+    paginationEl.innerHTML = '';
+
+    // Кнопка "Назад"
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+    const prevLink = document.createElement('a');
+    prevLink.className = 'page-link';
+    prevLink.href = '#';
+    prevLink.textContent = 'Назад';
+    if (currentPage > 1) {
+        prevLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            onPageChange(currentPage - 1);
+        });
+    }
+    prevLi.appendChild(prevLink);
+    paginationEl.appendChild(prevLi);
+
+    // Номера страниц
+    for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        const link = document.createElement('a');
+        link.className = 'page-link';
+        link.href = '#';
+        link.textContent = i;
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            onPageChange(i);
+        });
+        li.appendChild(link);
+        paginationEl.appendChild(li);
+    }
+
+    // Кнопка "Вперёд"
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+    const nextLink = document.createElement('a');
+    nextLink.className = 'page-link';
+    nextLink.href = '#';
+    nextLink.textContent = 'Вперёд';
+    if (currentPage < totalPages) {
+        nextLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            onPageChange(currentPage + 1);
+        });
+    }
+    nextLi.appendChild(nextLink);
+    paginationEl.appendChild(nextLi);
+
+    document.getElementById('paginationNav').style.display = 'block';
+}
+
 // Выход из системы
 async function logout() {
     try {

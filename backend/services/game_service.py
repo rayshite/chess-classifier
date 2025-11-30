@@ -2,7 +2,7 @@
 Сервис для работы с партиями.
 """
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -10,10 +10,10 @@ from models import Game, GameStatus, Snapshot
 
 
 async def create_game(
-    session: AsyncSession,
-    title: str,
-    player1_id: int,
-    player2_id: int
+        session: AsyncSession,
+        title: str,
+        player1_id: int,
+        player2_id: int
 ) -> Game:
     """
     Создать новую партию.
@@ -41,11 +41,11 @@ async def create_game(
 
 
 async def get_games_list(
-    session: AsyncSession,
-    status: GameStatus | None = None,
-    user_id: int | None = None,
-    limit: int = 100,
-    offset: int = 0
+        session: AsyncSession,
+        status: GameStatus | None = None,
+        user_id: int | None = None,
+        limit: int = 100,
+        offset: int = 0
 ):
     """
     Получить список партий с фильтрацией и пагинацией.
@@ -60,8 +60,6 @@ async def get_games_list(
     Returns:
         Список партий с загруженными связями (player1, player2, snapshots)
     """
-    from sqlalchemy import or_
-
     query = (
         select(Game)
         .options(
@@ -125,8 +123,6 @@ async def get_games_count(session: AsyncSession, status: GameStatus | None = Non
     Returns:
         Количество партий
     """
-    from sqlalchemy import or_
-
     query = select(func.count(Game.id))
 
     if status:

@@ -3,13 +3,13 @@
 """
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import current_active_user
 from classifier import predict_all_squares
 from database import get_async_session
 from models import GameStatus, User, UserRole
+from schemas import GameCreate
 from services import (
     get_games_list,
     get_games_count,
@@ -23,13 +23,6 @@ from services import (
 )
 
 router = APIRouter(prefix="/api/games", tags=["games"])
-
-
-class GameCreate(BaseModel):
-    """Схема создания партии."""
-    title: str
-    player1_id: int
-    player2_id: int
 
 
 async def get_game_with_access_check(

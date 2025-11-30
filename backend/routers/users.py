@@ -6,12 +6,12 @@ import secrets
 import string
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import current_active_user, require_admin
 from database import get_async_session
 from models import User, UserRole
+from schemas import UserCreateByAdmin, UserUpdateByAdmin, UserUpdateSelf
 from services import get_users_list, get_users_count, get_user_by_id, hash_password
 
 router = APIRouter(prefix="/api/users", tags=["users"])
@@ -21,27 +21,6 @@ def generate_temp_password(length: int = 10) -> str:
     """Генерирует временный пароль."""
     alphabet = string.ascii_letters + string.digits
     return ''.join(secrets.choice(alphabet) for _ in range(length))
-
-
-class UserUpdateByAdmin(BaseModel):
-    """Схема обновления пользователя администратором."""
-    name: str | None = None
-    email: EmailStr | None = None
-    role: str | None = None
-    is_active: bool | None = None
-
-
-class UserCreateByAdmin(BaseModel):
-    """Схема создания пользователя администратором."""
-    name: str
-    email: EmailStr
-    role: str = "student"
-
-
-class UserUpdateSelf(BaseModel):
-    """Схема обновления своего профиля."""
-    email: EmailStr | None = None
-    password: str | None = None
 
 
 @router.get("/players")

@@ -24,13 +24,6 @@ router.include_router(
     tags=["auth"],
 )
 
-# Роут обновления профиля
-router.include_router(
-    fastapi_users.get_users_router(UserRead, UserUpdate),
-    prefix="/api/users",
-    tags=["users"],
-)
-
 
 @router.get("/api/current_user")
 async def get_current_user(user: User = Depends(current_active_user)):

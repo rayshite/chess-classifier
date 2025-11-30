@@ -81,11 +81,6 @@
                         <input type="email" class="form-control" id="newUserEmail" required>
                     </div>
                     <div class="mb-3">
-                        <label for="newUserPassword" class="form-label">Пароль</label>
-                        <input type="password" class="form-control" id="newUserPassword" required minlength="6">
-                        <div class="form-text">Минимум 6 символов</div>
-                    </div>
-                    <div class="mb-3">
                         <label for="newUserRole" class="form-label">Роль</label>
                         <select class="form-select" id="newUserRole">
                             <option value="student">Ученик</option>
@@ -94,6 +89,7 @@
                         </select>
                     </div>
                 </form>
+                <div class="form-text mb-2">Временный пароль будет сгенерирован автоматически</div>
                 <div id="addUserError" class="alert alert-danger" style="display: none;"></div>
             </div>
             <div class="modal-footer">

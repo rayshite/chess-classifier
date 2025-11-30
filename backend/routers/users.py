@@ -27,8 +27,21 @@ class UserUpdateByAdmin(BaseModel):
     """Схема обновления пользователя администратором."""
     name: str | None = None
     email: EmailStr | None = None
-    role: UserRole | None = None
+    role: str | None = None
     is_active: bool | None = None
+
+
+class UserCreateByAdmin(BaseModel):
+    """Схема создания пользователя администратором."""
+    name: str
+    email: EmailStr
+    role: str = "student"
+
+
+class UserUpdateSelf(BaseModel):
+    """Схема обновления своего профиля."""
+    email: EmailStr | None = None
+    password: str | None = None
 
 
 @router.get("")
@@ -78,6 +91,79 @@ async def get_users(
     }
 
 
+@router.patch("/me")
+async def update_self(
+    data: UserUpdateSelf,
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user)
+):
+    """Обновить свой профиль."""
+    if data.email is not None:
+        user.email = data.email
+
+    if data.password is not None:
+        from pwdlib import PasswordHash
+        ph = PasswordHash.recommended()
+        user.hashed_password = ph.hash(data.password)
+
+    await session.commit()
+    await session.refresh(user)
+
+    return {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role.value
+    }
+
+
+@router.post("")
+async def create_user(
+    data: UserCreateByAdmin,
+    session: AsyncSession = Depends(get_async_session),
+    admin: User = Depends(current_active_user)
+):
+    """Создать пользователя с временным паролем (только для админов)."""
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Только администратор может создавать пользователей")
+
+    # Проверяем, что email не занят
+    from sqlalchemy import select
+    existing = await session.execute(select(User).where(User.email == data.email))
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует")
+
+    # Генерируем временный пароль
+    temp_password = generate_temp_password()
+
+    # Хешируем пароль
+    from pwdlib import PasswordHash
+    ph = PasswordHash.recommended()
+    hashed_password = ph.hash(temp_password)
+
+    # Создаём пользователя
+    user = User(
+        name=data.name,
+        email=data.email,
+        role=UserRole(data.role),
+        hashed_password=hashed_password,
+        is_active=True,
+        is_superuser=False,
+        is_verified=False
+    )
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+
+    return {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role.value,
+        "temporaryPassword": temp_password
+    }
+
+
 @router.patch("/{user_id}")
 async def update_user(
     user_id: int,
@@ -99,7 +185,7 @@ async def update_user(
     if data.email is not None:
         user.email = data.email
     if data.role is not None:
-        user.role = data.role
+        user.role = UserRole(data.role)
     if data.is_active is not None:
         user.is_active = data.is_active
 

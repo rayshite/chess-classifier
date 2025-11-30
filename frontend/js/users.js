@@ -156,21 +156,14 @@ function openAddUserModal() {
 async function submitUser() {
     const name = document.getElementById('newUserName').value.trim();
     const email = document.getElementById('newUserEmail').value.trim();
-    const password = document.getElementById('newUserPassword').value;
     const role = document.getElementById('newUserRole').value;
 
     const errorEl = document.getElementById('addUserError');
     errorEl.style.display = 'none';
 
     // Валидация на клиенте
-    if (!name || !email || !password) {
+    if (!name || !email) {
         errorEl.textContent = 'Заполните все обязательные поля';
-        errorEl.style.display = 'block';
-        return;
-    }
-
-    if (password.length < 6) {
-        errorEl.textContent = 'Пароль должен быть не менее 6 символов';
         errorEl.style.display = 'block';
         return;
     }
@@ -181,21 +174,37 @@ async function submitUser() {
     submitBtn.textContent = 'Регистрация...';
 
     try {
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch('/api/users', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ name, email, password, role })
+            body: JSON.stringify({ name, email, role })
         });
 
         if (!response.ok) {
             const data = await response.json();
-            throw new Error(data.detail || 'Ошибка при создании пользователя');
+            let errorMessage = 'Ошибка при создании пользователя';
+            if (Array.isArray(data.detail)) {
+                const emailError = data.detail.find(e => e.loc && e.loc.includes('email'));
+                if (emailError) {
+                    errorMessage = 'Введите корректный email адрес';
+                } else {
+                    errorMessage = 'Проверьте правильность заполнения полей';
+                }
+            } else if (typeof data.detail === 'string') {
+                errorMessage = data.detail;
+            }
+            throw new Error(errorMessage);
         }
 
-        // Закрываем модальное окно и обновляем список
+        const data = await response.json();
+
+        // Закрываем модальное окно и показываем временный пароль
         addUserModal.hide();
+        document.getElementById('tempPasswordValue').textContent = data.temporaryPassword;
+        tempPasswordModal.show();
+
         loadUsers(1, currentRole);
 
     } catch (error) {
@@ -245,7 +254,18 @@ async function saveUser() {
 
         if (!response.ok) {
             const data = await response.json();
-            throw new Error(data.detail || 'Ошибка сохранения');
+            let errorMessage = 'Ошибка сохранения';
+            if (Array.isArray(data.detail)) {
+                const emailError = data.detail.find(e => e.loc && e.loc.includes('email'));
+                if (emailError) {
+                    errorMessage = 'Введите корректный email адрес';
+                } else {
+                    errorMessage = 'Проверьте правильность заполнения полей';
+                }
+            } else if (typeof data.detail === 'string') {
+                errorMessage = data.detail;
+            }
+            throw new Error(errorMessage);
         }
 
         editUserModal.hide();

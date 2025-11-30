@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth import current_active_user
+from auth import current_active_user, require_admin
 from database import get_async_session
 from models import User, UserRole
 from services import get_users_list, get_users_count, get_user_by_id, hash_password
@@ -141,12 +141,9 @@ async def update_self(
 async def create_user(
     data: UserCreateByAdmin,
     session: AsyncSession = Depends(get_async_session),
-    admin: User = Depends(current_active_user)
+    admin: User = Depends(require_admin)
 ):
     """Создать пользователя с временным паролем (только для админов)."""
-    if admin.role != UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Только администратор может создавать пользователей")
-
     # Проверяем, что email не занят
     from sqlalchemy import select
     existing = await session.execute(select(User).where(User.email == data.email))
@@ -184,12 +181,9 @@ async def update_user(
     user_id: int,
     data: UserUpdateByAdmin,
     session: AsyncSession = Depends(get_async_session),
-    admin: User = Depends(current_active_user)
+    admin: User = Depends(require_admin)
 ):
     """Обновить пользователя (только для админов)."""
-    if admin.role != UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Только администратор может редактировать пользователей")
-
     user = await get_user_by_id(session, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -220,11 +214,9 @@ async def update_user(
 async def reset_user_password(
     user_id: int,
     session: AsyncSession = Depends(get_async_session),
-    admin: User = Depends(current_active_user)
+    admin: User = Depends(require_admin)
 ):
     """Сбросить пароль пользователя (только для админов)."""
-    if admin.role != UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Только администратор может сбрасывать пароли")
 
     user = await get_user_by_id(session, user_id)
     if not user:

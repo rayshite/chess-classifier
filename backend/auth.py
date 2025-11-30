@@ -2,7 +2,7 @@
 Конфигурация fastapi-users.
 """
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from fastapi_users import BaseUserManager, FastAPIUsers, IntegerIDMixin
 from fastapi_users.authentication import AuthenticationBackend, CookieTransport, JWTStrategy
 from fastapi_users.db import SQLAlchemyUserDatabase
@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
 from database import get_async_session
-from models import User
+from models import User, UserRole
 
 
 # Секретный ключ для JWT
@@ -57,3 +57,10 @@ fastapi_users = FastAPIUsers[User, int](get_user_manager, [auth_backend])
 # Зависимости для получения текущего пользователя
 current_active_user = fastapi_users.current_user(active=True)
 current_superuser = fastapi_users.current_user(active=True, superuser=True)
+
+
+async def require_admin(user: User = Depends(current_active_user)) -> User:
+    """Проверяет, что пользователь — администратор."""
+    if user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Требуются права администратора")
+    return user

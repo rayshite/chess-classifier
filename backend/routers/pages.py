@@ -57,8 +57,10 @@ async def game_page(
 
 
 @router.get("/users")
-async def users_page(request: Request):
+async def users_page(request: Request, user: User = Depends(current_active_user)):
     """Страница управления пользователями"""
+    if user.role != UserRole.ADMIN:
+        return RedirectResponse(url="/", status_code=302)
     return templates.TemplateResponse("users.html", {"request": request})
 
 

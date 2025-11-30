@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from auth import current_active_user
 from database import get_async_session
 from models import User, UserRole
-from services import get_users_list, get_users_count, get_user_by_id
+from services import get_users_list, get_users_count, get_user_by_id, hash_password
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -124,9 +124,7 @@ async def update_self(
         user.email = data.email
 
     if data.password is not None:
-        from pwdlib import PasswordHash
-        ph = PasswordHash.recommended()
-        user.hashed_password = ph.hash(data.password)
+        user.hashed_password = hash_password(data.password)
 
     await session.commit()
     await session.refresh(user)
@@ -158,17 +156,12 @@ async def create_user(
     # Генерируем временный пароль
     temp_password = generate_temp_password()
 
-    # Хешируем пароль
-    from pwdlib import PasswordHash
-    ph = PasswordHash.recommended()
-    hashed_password = ph.hash(temp_password)
-
     # Создаём пользователя
     user = User(
         name=data.name,
         email=data.email,
         role=UserRole(data.role),
-        hashed_password=hashed_password,
+        hashed_password=hash_password(temp_password),
         is_active=True,
         is_superuser=False,
         is_verified=False
@@ -239,11 +232,7 @@ async def reset_user_password(
 
     # Генерируем временный пароль
     temp_password = generate_temp_password()
-
-    # Хешируем пароль
-    from pwdlib import PasswordHash
-    ph = PasswordHash.recommended()
-    user.hashed_password = ph.hash(temp_password)
+    user.hashed_password = hash_password(temp_password)
 
     await session.commit()
 

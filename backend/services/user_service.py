@@ -2,10 +2,19 @@
 Сервис для работы с пользователями.
 """
 
+from pwdlib import PasswordHash
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import User, UserRole
+
+# Инициализируем хешер один раз
+_password_hasher = PasswordHash.recommended()
+
+
+def hash_password(password: str) -> str:
+    """Хеширует пароль."""
+    return _password_hasher.hash(password)
 
 
 async def get_users_list(

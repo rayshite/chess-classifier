@@ -60,19 +60,27 @@ function formatDate(isoString) {
     });
 }
 
+// Классы для ролей
+const roleClasses = {
+    'student': 'bg-light text-dark',
+    'teacher': 'bg-secondary',
+    'admin': 'bg-primary'
+};
+
 // Рендеринг списка пользователей
 function renderUsers(users) {
     const tbody = document.getElementById('usersList');
     tbody.innerHTML = users.map(user => {
         const roleText = roleLabels[user.role] || user.role;
+        const roleClass = roleClasses[user.role] || 'bg-secondary';
         const statusText = user.isActive ? 'Активен' : 'Неактивен';
-        const statusClass = user.isActive ? 'bg-success' : 'bg-secondary';
+        const statusClass = user.isActive ? 'bg-primary' : 'bg-light text-dark';
 
         return `
             <tr>
                 <td>${user.name}</td>
                 <td>${user.email}</td>
-                <td>${roleText}</td>
+                <td><span class="badge ${roleClass}">${roleText}</span></td>
                 <td><span class="badge ${statusClass}">${statusText}</span></td>
                 <td>${formatDate(user.createdAt)}</td>
                 <td>

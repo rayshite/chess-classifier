@@ -47,10 +47,10 @@ function renderGameInfo(game) {
     const statusBadge = document.getElementById('gameStatus');
     if (game.status === 'in_progress') {
         statusBadge.textContent = 'В процессе';
-        statusBadge.className = 'badge bg-success';
+        statusBadge.className = 'badge bg-primary';
     } else {
         statusBadge.textContent = 'Завершена';
-        statusBadge.className = 'badge bg-primary';
+        statusBadge.className = 'badge bg-secondary';
     }
 }
 

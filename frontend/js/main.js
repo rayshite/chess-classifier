@@ -60,7 +60,7 @@ function renderGames(games) {
     const tbody = document.getElementById('gamesList');
     tbody.innerHTML = games.map(game => {
         const statusText = game.status === 'in_progress' ? 'В процессе' : 'Завершена';
-        const badgeClass = game.status === 'in_progress' ? 'bg-success' : 'bg-primary';
+        const badgeClass = game.status === 'in_progress' ? 'bg-primary' : 'bg-secondary';
 
         return `
             <tr style="cursor: pointer;" onclick="window.location.href='/games/${game.id}'">

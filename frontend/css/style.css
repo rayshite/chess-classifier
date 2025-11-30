@@ -1,9 +1,15 @@
-/* Шахматная цветовая палитра */
 :root {
-    --chess-light: #f0d9b5;
-    --chess-dark: #b58863;
-    --chess-white:  #fffff8;
-    --chess-black: #000000;
+    /* Основные цвета доски */
+    --chess-light: #f0d9b5;      /* светлая клетка */
+    --chess-dark: #b58863;       /* тёмная клетка */
+
+    /* Производные оттенки */
+    --chess-darker: #8b6239;     /* темнее тёмной клетки - для hover */
+    --chess-medium: #d4a574;     /* среднее между light и dark */
+
+    /* Фон и текст */
+    --chess-white: #fffff8;      /* фон страницы */
+    --chess-black: #000000;      /* цвет для текста */
 }
 
 html, body {
@@ -55,26 +61,24 @@ footer {
 }
 
 .btn-primary:hover {
-    background-color: #9a6f4f !important;
-    border-color: #9a6f4f !important;
+    background-color: var(--chess-darker) !important;
+    border-color: var(--chess-darker) !important;
 }
 
 /* Бейджи */
-.badge.bg-secondary {
+.badge.bg-primary {
     background-color: var(--chess-dark) !important;
+    color: white !important;
 }
 
-.badge.bg-info {
+.badge.bg-secondary {
+    background-color: var(--chess-medium) !important;
+    color: white !important;
+}
+
+.badge.bg-light {
     background-color: var(--chess-light) !important;
     color: var(--chess-black) !important;
-}
-
-.badge.bg-success {
-    background-color: var(--chess-dark) !important;
-}
-
-.badge.bg-primary {
-    background-color: #9a6f4f !important;
 }
 
 /* Таблица */
@@ -162,7 +166,7 @@ footer {
 
 /* Страница логина */
 .login-page {
-    background-color: #f5f5f5;
+    background-color: var(--chess-light);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -176,10 +180,11 @@ footer {
 }
 
 .login-card {
-    background: white;
+    background: var(--chess-white);
     border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(44, 24, 16, 0.15);
     padding: 40px;
+    border: 1px solid var(--chess-medium);
 }
 
 .login-logo {
@@ -196,7 +201,7 @@ footer {
     font-family: 'Great Vibes', cursive;
     font-size: 2rem;
     margin-top: 10px;
-    color: #333;
+    color: var(--chess-black);
 }
 
 /* Карусель снепшотов */

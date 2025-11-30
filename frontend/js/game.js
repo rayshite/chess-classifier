@@ -65,7 +65,7 @@ function initializeBoards(snapshots) {
             draggable: false,
             dropOffBoard: 'snapback',
             sparePieces: false,
-            pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+            pieceTheme: '/static/images/pieces/{piece}.png'
         });
     });
 }
@@ -111,7 +111,7 @@ function buildCarouselSlides() {
             return Chessboard(`carouselBoard-${index}`, {
                 position: snapshot.position,
                 draggable: false,
-                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+                pieceTheme: '/static/images/pieces/{piece}.png'
             });
         });
     }, 100);

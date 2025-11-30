@@ -1,0 +1,15 @@
+/* Шрифт Great Vibes для заголовков */
+@font-face {
+    font-family: 'Great Vibes';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/static/fonts/GreatVibes-Regular.ttf') format('truetype');
+}
+
+/* Bootstrap Icons - переопределяем пути к шрифтам */
+@font-face {
+    font-display: block;
+    font-family: bootstrap-icons;
+    src: url('/static/fonts/bootstrap-icons.woff2') format('woff2');
+}

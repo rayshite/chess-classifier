@@ -227,7 +227,7 @@ async function logout() {
 
 // Загрузка текущего пользователя
 async function loadCurrentUser() {
-    const response = await api.get('/api/current_user');
+    const response = await api.get('/api/users/current_user');
     if (!response || !response.ok) {
         return null;
     }

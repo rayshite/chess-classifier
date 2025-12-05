@@ -7,7 +7,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth import current_active_user
+from auth import current_active_user_optional
 from config import settings
 from database import get_async_session
 from models import User, UserRole
@@ -25,8 +25,10 @@ async def login_page(request: Request):
 
 
 @router.get("/")
-async def home(request: Request, user: User = Depends(current_active_user)):
+async def home(request: Request, user: User | None = Depends(current_active_user_optional)):
     """Главная страница"""
+    if not user:
+        return RedirectResponse(url="/login", status_code=302)
     if user.role == UserRole.ADMIN:
         return RedirectResponse(url="/users", status_code=302)
     return templates.TemplateResponse("index.html", {"request": request})
@@ -37,9 +39,11 @@ async def game_page(
     request: Request,
     game_id: int,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_active_user)
+    user: User | None = Depends(current_active_user_optional)
 ):
     """Страница партии"""
+    if not user:
+        return RedirectResponse(url="/login", status_code=302)
     if user.role == UserRole.ADMIN:
         return RedirectResponse(url="/users", status_code=302)
 
@@ -57,14 +61,18 @@ async def game_page(
 
 
 @router.get("/users")
-async def users_page(request: Request, user: User = Depends(current_active_user)):
+async def users_page(request: Request, user: User | None = Depends(current_active_user_optional)):
     """Страница управления пользователями"""
+    if not user:
+        return RedirectResponse(url="/login", status_code=302)
     if user.role != UserRole.ADMIN:
         return RedirectResponse(url="/", status_code=302)
     return templates.TemplateResponse("users.html", {"request": request})
 
 
 @router.get("/profile")
-async def profile_page(request: Request):
+async def profile_page(request: Request, user: User | None = Depends(current_active_user_optional)):
     """Страница профиля пользователя"""
+    if not user:
+        return RedirectResponse(url="/login", status_code=302)
     return templates.TemplateResponse("profile.html", {"request": request})

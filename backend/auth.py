@@ -18,18 +18,18 @@ SECRET = settings.SECRET_KEY or "CHANGE_ME_IN_PRODUCTION"
 
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
-    """Получить адаптер базы данных для пользователей."""
+    """Получить адаптер базы данных для пользователей"""
     yield SQLAlchemyUserDatabase(session, User)
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
-    """Менеджер пользователей."""
+    """Менеджер пользователей"""
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
 
 
 async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db)):
-    """Получить менеджер пользователей."""
+    """Получить менеджер пользователей"""
     yield UserManager(user_db)
 
 
@@ -38,7 +38,7 @@ cookie_transport = CookieTransport(cookie_name="auth", cookie_max_age=settings.A
 
 
 def get_jwt_strategy() -> JWTStrategy:
-    """Стратегия JWT."""
+    """Стратегия JWT"""
     return JWTStrategy(secret=SECRET, lifetime_seconds=settings.AUTH_TOKEN_LIFETIME)
 
 
@@ -56,11 +56,11 @@ fastapi_users = FastAPIUsers[User, int](get_user_manager, [auth_backend])
 
 # Зависимости для получения текущего пользователя
 current_active_user = fastapi_users.current_user(active=True)
-current_superuser = fastapi_users.current_user(active=True, superuser=True)
+current_active_user_optional = fastapi_users.current_user(active=True, optional=True)
 
 
 async def require_admin(user: User = Depends(current_active_user)) -> User:
-    """Проверяет, что пользователь — администратор."""
+    """Проверяет, что пользователь — администратор"""
     if user.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Требуются права администратора")
     return user

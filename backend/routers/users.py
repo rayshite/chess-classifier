@@ -25,12 +25,23 @@ def generate_temp_password(length: int = 10) -> str:
     return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 
+@router.get("/current_user")
+async def get_current_user(user: User = Depends(current_active_user)):
+    """Получить текущего пользователя."""
+    return {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role.value
+    }
+
+
 @router.get("/players")
 async def get_players(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_active_user)
 ):
-    """Получить список игроков (ученики и учителя) для выбора в партию."""
+    """Получить список игроков (ученики и учителя) для выбора в партию"""
     query = (
         select(User)
         .where(or_(User.role == UserRole.STUDENT, User.role == UserRole.TEACHER))
@@ -50,7 +61,8 @@ async def get_players(
 async def get_users(
     page: int = 1,
     role: str | None = None,
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
+    admin: User = Depends(require_admin)
 ):
     """Получить список пользователей с пагинацией и фильтрацией"""
     page = max(1, page)
@@ -92,13 +104,13 @@ async def get_users(
     }
 
 
-@router.patch("/me")
-async def update_self(
+@router.patch("/current_user")
+async def update_current_user(
     data: UserUpdateSelf,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_active_user)
 ):
-    """Обновить свой профиль."""
+    """Обновить свой профиль"""
     if data.email is not None:
         user.email = data.email
 
@@ -122,7 +134,7 @@ async def create_user(
     session: AsyncSession = Depends(get_async_session),
     admin: User = Depends(require_admin)
 ):
-    """Создать пользователя с временным паролем (только для админов)."""
+    """Создать пользователя с временным паролем"""
     # Проверяем, что email не занят
     existing = await session.execute(select(User).where(User.email == data.email))
     if existing.scalar_one_or_none():
@@ -161,7 +173,7 @@ async def update_user(
     session: AsyncSession = Depends(get_async_session),
     admin: User = Depends(require_admin)
 ):
-    """Обновить пользователя (только для админов)."""
+    """Обновить пользователя"""
     user = await get_user_by_id(session, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -194,7 +206,7 @@ async def reset_user_password(
     session: AsyncSession = Depends(get_async_session),
     admin: User = Depends(require_admin)
 ):
-    """Сбросить пароль пользователя (только для админов)."""
+    """Сбросить пароль пользователя"""
 
     user = await get_user_by_id(session, user_id)
     if not user:

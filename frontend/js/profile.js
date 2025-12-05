@@ -4,7 +4,7 @@ let currentEmail = '';
 // Загрузка профиля
 async function loadProfile() {
     try {
-        const response = await api.get('/api/current_user');
+        const response = await api.get('/api/users/current_user');
         if (!response || !response.ok) {
             throw new Error('Ошибка загрузки профиля');
         }
@@ -66,7 +66,7 @@ async function saveProfile() {
     saveBtn.textContent = 'Сохранение...';
 
     try {
-        const response = await api.patch('/api/users/me', data);
+        const response = await api.patch('/api/users/current_user', data);
 
         if (!response || !response.ok) {
             const err = response ? await response.json() : {};

@@ -17,13 +17,6 @@ router.include_router(
     tags=["auth"],
 )
 
-# Роут регистрации
-router.include_router(
-    fastapi_users.get_register_router(UserRead, UserCreate),
-    prefix="/api/auth",
-    tags=["auth"],
-)
-
 
 @router.get("/api/current_user")
 async def get_current_user(user: User = Depends(current_active_user)):

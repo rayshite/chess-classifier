@@ -152,6 +152,9 @@ async def add_snapshot(
     session: AsyncSession = Depends(get_async_session)
 ):
     """Добавить новый снепшот к партии"""
+    if game.status != GameStatus.IN_PROGRESS:
+        raise HTTPException(status_code=400, detail="Партия завершена")
+
     contents = await image.read()
 
     try:
@@ -178,6 +181,9 @@ async def remove_last_snapshot(
     session: AsyncSession = Depends(get_async_session)
 ):
     """Удалить последний снепшот партии"""
+    if game.status != GameStatus.IN_PROGRESS:
+        raise HTTPException(status_code=400, detail="Партия завершена")
+
     snapshot = await delete_last_snapshot(session, game.id)
 
     if not snapshot:

@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+python-multipart
+jinja2
+
+sqlalchemy[asyncio]
+asyncpg
+alembic
+
+fastapi-users[sqlalchemy]
+python-dotenv
+
+tensorflow
+keras
+opencv-python
+numpy
+pillow

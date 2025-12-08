@@ -1,0 +1,194 @@
+// Текущая страница и фильтр
+let currentPage = 1;
+let currentStatus = 'all';
+let createGameModal;
+let currentUser = null;
+
+// Загрузка партий с сервера
+async function loadGames(page = 1, status = 'all') {
+    const data = await loadListData({
+        apiUrl: '/api/games',
+        filterParam: 'status',
+        filterValue: status,
+        page: page,
+        tableId: 'gamesTable',
+        dataKey: 'games',
+        renderFn: renderGames,
+        onPageChange: changePage,
+        errorMessage: 'Не удалось загрузить партии.'
+    });
+    if (data) {
+        currentPage = data.pagination.currentPage;
+    }
+}
+
+// Рендеринг списка партий
+function renderGames(games) {
+    const tbody = document.getElementById('gamesList');
+    tbody.innerHTML = games.map(game => {
+        const statusText = game.status === 'in_progress' ? 'В процессе' : 'Завершена';
+        const badgeClass = game.status === 'in_progress' ? 'bg-primary' : 'bg-secondary';
+
+        return `
+            <tr class="game-row" style="cursor: pointer;" data-game-id="${game.id}">
+                <td>${escapeHtml(game.title)}</td>
+                <td>${escapeHtml(game.player1.name)}</td>
+                <td>${escapeHtml(game.player2.name)}</td>
+                <td>${game.snapshotCount}</td>
+                <td><span class="badge ${badgeClass}">${statusText}</span></td>
+                <td>${formatDate(game.createdAt)}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Переключение страницы
+function changePage(page) {
+    if (page < 1) return;
+    loadGames(page, currentStatus);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Фильтрация по статусу
+function filterGames() {
+    currentStatus = document.getElementById('statusFilter').value;
+    loadGames(1, currentStatus);  // Сбрасываем на первую страницу
+}
+
+// Загрузка списка игроков для выбора
+async function loadPlayers() {
+    try {
+        const response = await api.get('/api/users/players');
+        if (!response || !response.ok) {
+            throw new Error('Ошибка загрузки игроков');
+        }
+
+        const players = await response.json();
+
+        const player1Select = document.getElementById('player1');
+        const player2Select = document.getElementById('player2');
+
+        // Очищаем и заполняем селекты
+        const defaultOption = '<option value="">Выберите игрока</option>';
+        const options = players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
+        player1Select.innerHTML = defaultOption + options;
+        player2Select.innerHTML = defaultOption + options;
+
+        // Для учеников: автоподстановка себя во второе поле при любом изменении первого
+        if (currentUser && currentUser.role === 'student') {
+            player1Select.addEventListener('change', () => {
+                if (player1Select.value && currentUser) {
+                    // Если выбран не текущий пользователь - подставляем себя во второе поле
+                    if (player1Select.value !== currentUser.id) {
+                        player2Select.value = currentUser.id;
+                    }
+                }
+            });
+
+            player2Select.addEventListener('change', () => {
+                if (player2Select.value && currentUser) {
+                    // Если выбран не текущий пользователь - подставляем себя в первое поле
+                    if (player2Select.value !== currentUser.id) {
+                        player1Select.value = currentUser.id;
+                    }
+                }
+            });
+        }
+
+    } catch (error) {
+        console.error('Ошибка загрузки игроков:', error);
+    }
+}
+
+// Открытие модального окна создания партии
+async function openCreateGameModal() {
+    document.getElementById('createGameForm').reset();
+    document.getElementById('createGameError').style.display = 'none';
+
+    await loadPlayers();
+    createGameModal.show();
+}
+
+// Отправка формы создания партии
+async function submitGame() {
+    const title = document.getElementById('gameTitle').value.trim();
+    const player1Id = document.getElementById('player1').value;
+    const player2Id = document.getElementById('player2').value;
+
+    const errorEl = document.getElementById('createGameError');
+    errorEl.style.display = 'none';
+
+    // Валидация
+    if (!title || !player1Id || !player2Id) {
+        errorEl.textContent = 'Заполните все поля';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    if (player1Id === player2Id) {
+        errorEl.textContent = 'Игроки должны быть разными';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    const submitBtn = document.getElementById('submitGameBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Создание...';
+
+    try {
+        const response = await api.post('/api/games', {
+            title: title,
+            player1Id: parseInt(player1Id),
+            player2Id: parseInt(player2Id)
+        });
+
+        if (!response || !response.ok) {
+            const data = response ? await response.json() : {};
+            throw new Error(data.detail || 'Ошибка создания партии');
+        }
+
+        const game = await response.json();
+
+        createGameModal.hide();
+        // Переход на страницу созданной партии
+        window.location.href = `/games/${game.id}`;
+
+    } catch (error) {
+        errorEl.textContent = error.message;
+        errorEl.style.display = 'block';
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Создать';
+    }
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', async () => {
+    // Инициализируем модальное окно
+    createGameModal = new bootstrap.Modal(document.getElementById('createGameModal'));
+
+    // Загружаем текущего пользователя
+    currentUser = await loadCurrentUser();
+
+    // Загружаем партии
+    loadGames(1);
+
+    // Обработчик кнопки создания партии
+    document.getElementById('createGameBtn').addEventListener('click', openCreateGameModal);
+
+    // Обработчик отправки формы создания партии
+    document.getElementById('submitGameBtn').addEventListener('click', submitGame);
+
+    // Обработчик фильтра
+    document.getElementById('statusFilter').addEventListener('change', filterGames);
+
+    // Делегирование событий для кликов по строкам таблицы
+    document.getElementById('gamesList').addEventListener('click', (e) => {
+        const row = e.target.closest('.game-row');
+        if (row) {
+            const gameId = row.dataset.gameId;
+            window.location.href = `/games/${gameId}`;
+        }
+    });
+});

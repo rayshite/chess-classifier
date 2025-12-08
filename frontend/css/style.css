@@ -1,0 +1,219 @@
+:root {
+    /* Основные цвета доски */
+    --chess-light: #f0d9b5;      /* светлая клетка */
+    --chess-dark: #b58863;       /* тёмная клетка */
+
+    /* Производные оттенки */
+    --chess-darker: #8b6239;     /* темнее тёмной клетки - для hover */
+    --chess-medium: #d4a574;     /* среднее между light и dark */
+
+    /* Фон и текст */
+    --chess-white: #fffff8;      /* фон страницы */
+    --chess-black: #000000;      /* цвет для текста */
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background-color: var(--chess-white);
+    display: flex;
+    flex-direction: column;
+}
+
+.content-wrapper {
+    flex: 1 0 auto;
+}
+
+footer {
+    flex-shrink: 0;
+}
+
+/* Шрифт для заголовка в хедере */
+.brand-title {
+    font-family: 'Great Vibes', cursive;
+    font-size: 2rem;
+    color: var(--chess-black);
+}
+
+/* Выравнивание логотипа и текста по центру */
+.navbar-brand {
+    display: inline-flex !important;
+    align-items: flex-end !important;
+}
+
+.navbar-brand img {
+    margin-right: 1rem;
+}
+
+/* Header & Footer */
+.navbar, footer {
+    padding: 0 10%;
+    background-color: var(--chess-white) !important;
+}
+
+/* Кнопки */
+.btn-primary {
+    background-color: var(--chess-dark) !important;
+    border-color: var(--chess-dark) !important;
+    color: var(--chess-white) !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--chess-darker) !important;
+    border-color: var(--chess-darker) !important;
+}
+
+/* Бейджи */
+.badge.bg-primary {
+    background-color: var(--chess-dark) !important;
+    color: white !important;
+}
+
+.badge.bg-secondary {
+    background-color: var(--chess-medium) !important;
+    color: white !important;
+}
+
+.badge.bg-light {
+    background-color: var(--chess-light) !important;
+    color: var(--chess-black) !important;
+}
+
+/* Таблица */
+.table {
+    --bs-table-bg: transparent;
+    background-color: var(--chess-white) !important;
+}
+
+.table tbody tr, .table thead th {
+    background-color: var(--chess-white) !important;
+}
+
+.table thead {
+    background-color: var(--chess-dark) !important;
+    color: var(--chess-white) !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--chess-light) !important;
+}
+
+/* Пагинация */
+.pagination .page-link {
+    color: var(--chess-black);
+    background-color: var(--chess-white);
+    border-color: var(--chess-dark);
+}
+
+.pagination .page-link:hover {
+    background-color: var(--chess-light);
+    border-color: var(--chess-dark);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--chess-dark);
+    border-color: var(--chess-dark);
+    color: var(--chess-white);
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: var(--chess-white);
+    border-color: var(--chess-dark);
+    color: #999;
+}
+
+/* Форма */
+.form-select, .form-control {
+    border-color: var(--chess-dark);
+}
+
+.form-select:focus, .form-control:focus {
+    border-color: var(--chess-dark);
+    box-shadow: 0 0 0 0.2rem rgba(181, 136, 99, 0.25);
+}
+
+/* Карточки */
+.card {
+    background-color: var(--chess-white);
+    border-color: var(--chess-dark);
+}
+
+.card-header {
+    background-color: var(--chess-light);
+    border-bottom-color: var(--chess-dark);
+}
+
+/* Карточки снепшотов */
+.snapshot-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.snapshot-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.snapshot-card > div[id^="board-"] {
+    border-bottom: 2px solid var(--chess-dark);
+}
+
+/* Доски в карточках */
+.snapshot-card .chessboard {
+    width: 100% !important;
+}
+
+/* Страница логина */
+.login-page {
+    background-color: var(--chess-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.login-container {
+    max-width: 400px;
+    width: 100%;
+    padding: 20px;
+}
+
+.login-card {
+    background: var(--chess-white);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(44, 24, 16, 0.15);
+    padding: 40px;
+    border: 1px solid var(--chess-medium);
+}
+
+.login-logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-logo img {
+    width: 60px;
+    height: auto;
+}
+
+.login-logo h1 {
+    font-family: 'Great Vibes', cursive;
+    font-size: 2rem;
+    margin-top: 10px;
+    color: var(--chess-black);
+}
+
+/* Карусель снепшотов */
+#snapshotCarousel .carousel-control-prev-icon,
+#snapshotCarousel .carousel-control-next-icon {
+    background-color: var(--chess-dark);
+    border-radius: 25%;
+    padding: 20px;
+}
+
+#snapshotCarousel .carousel-control-prev.disabled,
+#snapshotCarousel .carousel-control-next.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}

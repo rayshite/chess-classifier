@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Партия - Шахматные партии{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/vendor/chessboard-1.0.0.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Навигация назад -->
+    <div class="mb-3">
+        <a href="/" class="text-decoration-none">
+            <i class="bi bi-arrow-left"></i> Назад к списку партий
+        </a>
+    </div>
+
+    <!-- Информация о партии -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0" id="gameTitle">Загрузка...</h4>
+            <span class="badge" id="gameStatus"></span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Игрок 1 (Белые):</strong> <span id="player1Name"></span></p>
+                    <p><strong>Игрок 2 (Черные):</strong> <span id="player2Name"></span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Дата создания:</strong> <span id="createdAt"></span></p>
+                    <p><strong>Снепшотов:</strong> <span id="snapshotCount"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Панель управления -->
+    <div class="d-flex gap-2 mb-4" id="controlPanel">
+        <button id="addSnapshotBtn" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Добавить снепшот
+        </button>
+        <button id="deleteLastSnapshotBtn" class="btn btn-primary">
+            <i class="bi bi-trash"></i> Удалить последний снепшот
+        </button>
+        <button id="finishGameBtn" class="btn btn-primary">
+            <i class="bi bi-check-circle"></i> Завершить партию
+        </button>
+    </div>
+
+    <!-- Снепшоты -->
+    <h5 class="mb-3">Снепшоты партии</h5>
+    <div class="row g-3" id="snapshotsList">
+        <!-- Снепшоты будут добавлены через JS -->
+    </div>
+
+    <!-- Пустое состояние -->
+    <div id="emptyState" class="text-center py-5" style="display: none;">
+        <i class="bi bi-inbox" style="font-size: 3rem; color: #999;"></i>
+        <p class="text-muted mt-3">Снепшотов пока нет. Добавьте первый снепшот, чтобы начать отслеживать партию.</p>
+    </div>
+</div>
+
+<!-- Модальное окно для просмотра снепшотов -->
+<div class="modal fade" id="snapshotModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ход <span id="modalMoveNumber"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="snapshotCarousel" class="carousel slide" data-bs-wrap="false">
+                    <div class="carousel-inner" id="carouselInner">
+                        <!-- Слайды будут добавлены через JS -->
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#snapshotCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Предыдущий</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#snapshotCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Следующий</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для добавления снепшота -->
+<div class="modal fade" id="addSnapshotModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить снепшот</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addSnapshotForm">
+                    <div class="mb-3">
+                        <label for="snapshotImage" class="form-label">Фото шахматной доски</label>
+                        <input type="file" class="form-control" id="snapshotImage" accept="image/*" required>
+                    </div>
+                    <div id="imagePreview" class="mb-3 text-center" style="display: none;">
+                        <img id="previewImg" src="" alt="Preview" style="max-width: 100%; max-height: 300px;">
+                    </div>
+                    <div id="uploadError" class="alert alert-danger" style="display: none;"></div>
+                    <div id="uploadProgress" class="mb-3" style="display: none;">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                            <span>Распознавание позиции...</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="submitSnapshotBtn">
+                    <i class="bi bi-upload"></i> Загрузить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Удаление снепшота</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <p class="mt-3 mb-0">Вы уверены, что хотите удалить последний снепшот?</p>
+                <p class="text-muted small">Это действие нельзя отменить.</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="confirmDeleteBtn">
+                    <i class="bi bi-trash"></i> Удалить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/vendor/jquery-3.7.1.min.js"></script>
+<script src="/static/js/vendor/chessboard-1.0.0.min.js"></script>
+<script src="/static/js/game.js"></script>
+{% endblock %}

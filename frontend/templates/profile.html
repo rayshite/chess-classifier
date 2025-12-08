@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Мой профиль - Шахматные партии{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Навигация назад -->
+    <div class="mb-3">
+        <a href="/" class="text-decoration-none">
+            <i class="bi bi-arrow-left"></i> На главную
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-person-circle me-2"></i>Мой профиль</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Индикатор загрузки -->
+                    <div id="loading" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                    </div>
+
+                    <!-- Информация о пользователе -->
+                    <div id="profileInfo" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Имя</label>
+                            <p class="form-control-plaintext fs-5" id="profileName"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Email</label>
+                            <p class="form-control-plaintext" id="profileEmail"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Роль</label>
+                            <p class="form-control-plaintext">
+                                <span class="badge bg-primary" id="profileRole"></span>
+                            </p>
+                        </div>
+                        <hr>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            <i class="bi bi-pencil me-1"></i>Редактировать
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно редактирования профиля -->
+<div class="modal fade" id="editProfileModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Редактирование профиля</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfileForm">
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPassword" class="form-label">Новый пароль</label>
+                        <input type="password" class="form-control" id="editPassword" minlength="6">
+                        <div class="form-text">Оставьте пустым, если не хотите менять</div>
+                    </div>
+                </form>
+                <div id="editError" class="alert alert-danger" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="saveProfileBtn">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/profile.js"></script>
+{% endblock %}

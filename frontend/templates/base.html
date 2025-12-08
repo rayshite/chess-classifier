@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Шахматные партии{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" href="/static/css/fonts.css">
+    <link rel="stylesheet" href="/static/css/vendor/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/vendor/bootstrap-icons.min.css">
+    {% block extra_css %}{% endblock %}
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="content-wrapper">
+    <nav class="navbar navbar-dark bg-dark mb-4 pt-2 pb-4">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <img src="/static/images/logo.svg" alt="Logo" width="25" height="55">
+                <span class="brand-title">Шахматные партии</span>
+            </span>
+            <div class="d-flex gap-3 align-items-center">
+                <a href="/profile" class="badge bg-secondary text-decoration-none" title="Мой профиль">
+                    <span id="userName"></span>
+                </a>
+                <a href="#" id="logoutBtn" class="text-black" title="Выйти">
+                    <i class="bi bi-box-arrow-right" style="font-size: 20px;"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}{% endblock %}
+</div>
+
+<footer class="footer mt-auto pb-4 pt-5">
+    <div class="container text-center">
+        <span class="text-muted">
+            Шахматные партии &copy; 2025<br>Валерия Райшите |
+            <a href="mailto:70172011@online.muiv.ru" class="text-muted text-decoration-none">70172011@online.muiv.ru</a>
+        </span>
+    </div>
+</footer>
+
+<!-- Модальное окно ошибки -->
+<div class="modal fade" id="errorModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Ошибка</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-3">
+                <i class="bi bi-exclamation-circle text-danger" style="font-size: 3rem;"></i>
+                <p class="mt-3 mb-0" id="errorMessage"></p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/vendor/bootstrap.bundle.min.js"></script>
+<script src="/static/js/common.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

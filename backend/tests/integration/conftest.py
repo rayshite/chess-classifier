@@ -172,7 +172,7 @@ async def admin_user(async_session_maker, setup_database) -> User:
 @pytest_asyncio.fixture(loop_scope="session")
 async def client(async_session_maker, setup_database) -> AsyncGenerator[AsyncClient, None]:
     """Создаём тестовый HTTP клиент."""
-    from main import app
+    from app import app
 
     async def override_get_session():
         async with async_session_maker() as session:

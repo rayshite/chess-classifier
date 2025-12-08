@@ -15,8 +15,7 @@ from testcontainers.postgres import PostgresContainer
 
 os.environ["TESTCONTAINERS_RYUK_DISABLED"] = "true"
 
-from database import Base, get_async_session
-from models import User, UserRole
+from db import Base, get_async_session, User, UserRole
 
 
 @pytest.fixture(scope="session")

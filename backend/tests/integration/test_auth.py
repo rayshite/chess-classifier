@@ -5,7 +5,7 @@
 import pytest
 from httpx import AsyncClient
 
-from models import User
+from db import User
 
 
 class TestAuth:

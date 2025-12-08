@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pytest
 from httpx import AsyncClient
 
-from models import User
+from db import User
 
 
 # Путь к тестовому изображению

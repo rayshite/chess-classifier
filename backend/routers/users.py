@@ -11,9 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import current_active_user, require_admin
 from config import settings
-from database import get_async_session
-from models import User, UserRole
-from schemas import UserCreateByAdmin, UserUpdateByAdmin, UserUpdateSelf
+from db import get_async_session, User, UserRole, UserCreateByAdmin, UserUpdateByAdmin, UserUpdateSelf
 from services import get_users_list, get_users_count, get_user_by_id, hash_password
 
 router = APIRouter(prefix="/api/users", tags=["users"])

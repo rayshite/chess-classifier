@@ -9,8 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import current_active_user_optional
 from config import settings
-from database import get_async_session
-from models import User, UserRole
+from db import get_async_session, User, UserRole
 from services import get_game_by_id
 
 router = APIRouter()

@@ -3,7 +3,7 @@
 """
 import numpy as np
 
-from classifier import CLASS_NAMES, preprocess_square
+from services.ml import CLASS_NAMES, preprocess_square
 
 
 class TestClassifier:

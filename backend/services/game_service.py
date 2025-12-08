@@ -6,7 +6,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from models import Game, GameStatus, Snapshot
+from db import Game, GameStatus, Snapshot
 
 
 async def create_game(

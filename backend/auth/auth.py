@@ -9,8 +9,7 @@ from fastapi_users.db import SQLAlchemyUserDatabase
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
-from database import get_async_session
-from models import User, UserRole
+from db import get_async_session, User, UserRole
 
 
 # Секретный ключ для JWT

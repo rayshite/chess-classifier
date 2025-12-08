@@ -6,8 +6,14 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+import sys
+from pathlib import Path
+
+# Добавляем backend в путь для импорта config
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 from config import settings
-from database import Base
+from db.database import Base
 
 config = context.config
 

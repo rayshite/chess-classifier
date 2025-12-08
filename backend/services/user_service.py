@@ -6,7 +6,7 @@ from pwdlib import PasswordHash
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import User, UserRole
+from db import User, UserRole
 
 # Инициализируем хешер один раз
 _password_hasher = PasswordHash.recommended()

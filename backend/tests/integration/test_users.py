@@ -7,7 +7,7 @@ import time
 import pytest
 from httpx import AsyncClient
 
-from models import User
+from db import User
 
 
 async def login_user(client: AsyncClient, email: str, password: str) -> str:

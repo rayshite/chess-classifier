@@ -6,11 +6,8 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import current_active_user
-from classifier import predict_all_squares
 from config import settings
-from database import get_async_session
-from models import GameStatus, User, UserRole
-from schemas import GameCreate
+from db import get_async_session, GameStatus, User, UserRole, GameCreate
 from services import (
     get_games_list,
     get_games_count,
@@ -21,6 +18,7 @@ from services import (
     update_game_status,
     process_board_image,
     predictions_to_fen,
+    predict_all_squares,
 )
 
 router = APIRouter(prefix="/api/games", tags=["games"])

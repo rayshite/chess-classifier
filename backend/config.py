@@ -27,6 +27,9 @@ class Settings:
     # Время жизни токена авторизации (в секундах, по умолчанию 7 дней)
     AUTH_TOKEN_LIFETIME: int = int(os.getenv("AUTH_TOKEN_LIFETIME", 3600 * 24 * 7))
 
+    # Использовать Secure cookie (только HTTPS). По умолчанию True для безопасности.
+    COOKIE_SECURE: bool = os.getenv("COOKIE_SECURE", "true").lower() == "true"
+
     # Лимит элементов на странице
     PAGE_LIMIT: int = int(os.getenv("PAGE_LIMIT", 10))
 

@@ -1,3 +1,4 @@
+import bisect
 import logging
 import os
 import cv2
@@ -132,17 +133,20 @@ def _find_grid_peaks(profile):
             if span < n * 0.5:
                 continue
 
-            # Для каждой ожидаемой позиции ищем ближайший пик
+            # Для каждой ожидаемой позиции ищем ближайший пик (bisect)
             matched = []
+            threshold = spacing * 0.15
             for k in range(9):
                 expected = top_peaks[i] + k * spacing
+                idx = bisect.bisect_left(top_peaks, expected)
                 best_match = None
-                best_dist = spacing * 0.15
-                for p in top_peaks:
-                    dist = abs(p - expected)
-                    if dist < best_dist:
-                        best_dist = dist
-                        best_match = p
+                best_dist = threshold
+                for ci in (idx - 1, idx):
+                    if 0 <= ci < len(top_peaks):
+                        dist = abs(top_peaks[ci] - expected)
+                        if dist < best_dist:
+                            best_dist = dist
+                            best_match = top_peaks[ci]
                 if best_match is not None:
                     matched.append(best_match)
 
